@@ -2,25 +2,11 @@ import React, { Component } from "react";
 import axios from "axios";
 import queryString from "query-string";
 import FriendsList from "./friendsList";
-import NavBar from './NavBar'
+import NavBar from "./NavBar";
 import "whatwg-fetch";
 import { io } from "socket.io-client";
 
-import AdbIcon from "@mui/icons-material/Adb";
-import {
-  Box,
-  TextField,
-  Modal,
-  Typography,
-  Button,
-  AppBar,
-  Toolbar,
-  Menu,
-  Container,
-  Tooltip,
-  MenuItem,
-} from "@mui/material";
-const pages = ["Add Friend", "Remove Friend"];
+import { Box, TextField, Button, Container } from "@mui/material";
 
 export default class chatSideBar extends Component {
   constructor() {
@@ -29,8 +15,6 @@ export default class chatSideBar extends Component {
       message: "",
       usersCollection: [],
       requestedFriend: "",
-      openAddFriend: false,
-      openRemoveFriend: false,
       currentUser: [],
       loading: false,
     };
@@ -54,6 +38,7 @@ export default class chatSideBar extends Component {
             if (user.email === queryParams.email) {
               return user;
             }
+            return true;
           })[0],
         });
       })
@@ -63,14 +48,15 @@ export default class chatSideBar extends Component {
     console.log(this.state.currentUser);
   }
 
-  // this.socket = io("ws://localhost:8900");
-  // this.socket.on("welcome", (message) => {
-  //   console.log(message);
-  //   console.log("hello");
-  // });
+ 
 
   componentDidMount() {
     this.getUserData();
+    this.socket = io("ws://localhost:8900");
+    this.socket.on("welcome", (message) => {
+      console.log(message);
+      console.log("hello");
+    });
   }
 
   componentDidUpdate(prevProps, prevState) {
@@ -85,15 +71,15 @@ export default class chatSideBar extends Component {
   handleSubmit() {
     console.log(this.state.currentUser);
 
-    // this.socket.emit("sendMessage", {
-    //   text: this.state.message,
-    // });
+    this.socket.emit("sendMessage", {
+      text: this.state.message,
+    });
   }
 
   addFriend() {
     var isAlreadyFriend = false;
     var isInSystem = false;
-    const friendToAdd = {};
+    var friendToAdd = {};
     this.state.usersCollection.filter((userFriend) => {
       if (userFriend.email === this.state.requestedFriend) {
         console.log("user friend found");
@@ -108,6 +94,7 @@ export default class chatSideBar extends Component {
         console.log("user is already a friend");
         isAlreadyFriend = true;
       }
+      return true;
     });
 
     if (!isAlreadyFriend && isInSystem) {
@@ -129,8 +116,8 @@ export default class chatSideBar extends Component {
         console.log("user is a friend");
         isAlreadyFriend = true;
         return currentUserFriend;
-
       }
+      return true;
     });
 
     if (isAlreadyFriend) {
@@ -148,7 +135,7 @@ export default class chatSideBar extends Component {
       <h1>hello there it is still loading</h1>
     ) : (
       <Container maxWidth="xl">
-        <NavBar AddFriend={this.addFriend} RemoveFriend={this.removeFriend}/>
+        <NavBar AddFriend={this.addFriend} RemoveFriend={this.removeFriend} />
         <Box display={"inline-flex"} width={"100%"}>
           {this.state.currentUser ? (
             <FriendsList friends={this.state.currentUser.userFriend} />

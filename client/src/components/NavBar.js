@@ -5,7 +5,6 @@ import {
   Box,
   IconButton,
   Avatar,
-  TextField,
   Modal,
   Typography,
   Button,
@@ -17,7 +16,6 @@ import {
   MenuItem,
 } from "@mui/material";
 const pages = ["Add Friend", "Remove Friend"];
-const settings = ["Profile", "Account", "Dashboard", "Logout"];
 
 export default class NavBar extends Component {
   constructor() {

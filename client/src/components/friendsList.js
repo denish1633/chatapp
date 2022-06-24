@@ -8,7 +8,6 @@ import {
   ListItemAvatar,
   Avatar,
   Typography,
-  Button,
 } from "@mui/material";
 
 export default class FriendsList extends Component {
