@@ -15,6 +15,8 @@ router.route("/signup").post((req, res) => {
   const email = req.body.email;
   const password = req.body.password;
   const userFriend = req.body.userFriend;
+  const socketId = req.body.socketId;
+  const pendingRequest = req.body.pendingRequest;
 
   const newAddedUser = new newUser({
     firstName,
@@ -22,6 +24,8 @@ router.route("/signup").post((req, res) => {
     email,
     password,
     userFriend,
+    socketId,
+    pendingRequest,
   });
 
   newAddedUser
@@ -43,7 +47,6 @@ router.route("/signin").post((req, res) => {
     .catch((err) => res.status(400).json("Error: " + err));
 });
 
-
 router.route("/:id").get((req, res) => {
   newUser
     .findById(req.params.id)
@@ -59,6 +62,8 @@ router.route("/update/:id").post((req, res) => {
       newUser.email = req.body.email;
       newUser.password = req.body.password;
       newUser.userFriend = req.body.userFriend;
+      newUser.socketId = req.body.socketId;
+      newUser.pendingRequest = req.body.pendingRequest;
 
       newUser
         .save()
