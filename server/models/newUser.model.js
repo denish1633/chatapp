@@ -9,6 +9,11 @@ const userSchema = new Schema(
     email: { type: String, required: true },
     password: { type: String, required: true },
     userFriend: { type: Array },
+    pendingRequest: { type: Array },
+    roomId: { type: Array },
+    socketId: { type: Array },
+    profilePhoto:{type: String}
+
   },
   {
     timestamps: true,

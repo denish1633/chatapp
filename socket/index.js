@@ -1,46 +1,29 @@
 const io = require("socket.io")(8900, {
-    cors: {
-      origin: "http://localhost:3000",
-    },
+  cors: {
+    origin: "http://localhost:3000",
+  },
+});
+io.on("connection", (socket) => {
+  var room;
+  console.log("user connected");
+  socket.on("joinRoom", ({ senderUser, recieverUser, roomId }) => {
+    socket.join(roomId);
+    room=roomId
   });
-  const axios=require("axios");
-  
-  let users = [];
-  
-  const addUser = (userId, socketId) => {
-    !users.some((user) => user.userId === userId) &&
-      users.push({ userId, socketId });
-  };
-  
-  const removeUser = (socketId) => {
-    users = users.filter((user) => user.socketId !== socketId);
-  };
-  
-  const getUser = (userId) => {
-    return users.find((user) => user.userId === userId);
-  };
-  
-  io.on("connection", (socket) => {
-    //when ceonnect
-    console.log("a user connected.");
-    
-    //take userId and socketId from user
-    socket.on("addUser", (userId) => {
-      addUser(userId, socket.id);
-      io.emit("getUsers", users);
-    });
-  
-    //send and get message
-    socket.on("sendMessage", (text ) => {
-      
-     console.log(text);
-     console.log(socket.id);
-    });
-  
-    //when disconnect
-    socket.on("disconnect", () => {
-      console.log("a user disconnected!");
-      removeUser(socket.id);
-      io.emit("getUsers", users);
-    });
+  socket.on("sendMessage", (data) => {
+    data.roomId = room;
+    if(io.sockets.adapter.rooms.get(room).size == 1)
+    {
+      socket.to(room).emit("getMessage", data);
+      socket.broadcast.emit("notification", data);
+    } 
+    else if(io.sockets.adapter.rooms.get(room).size == 2)
+    {
+      socket.to(room).emit("getMessage", data);
+    } 
   });
+  socket.on("disconnect", () => {   
+    socket.leave(room);
+    console.log(`disconnected!`);
+  });
+});

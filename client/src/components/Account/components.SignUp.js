@@ -13,16 +13,6 @@ import {
   Typography,
   Container,
 } from "@mui/material";
-import LockOutlinedIcon from "@mui/icons-material/LockOutlined";
-//basic front end work done
-
-// test done
-// console shows all data entered in the field
-
-// left to done
-//
-// ii. validation
-// iii. if all good send it to next page i.e image upload
 export default class SignUp extends React.Component {
   constructor(props) {
     super(props);
@@ -33,12 +23,11 @@ export default class SignUp extends React.Component {
       password: "",
       confirmPassword: "",
       usersCollection: [],
+      profilePhoto: "",
     };
-
     this.handleSubmit = this.handleSubmit.bind(this);
     this.handleChange = this.handleChange.bind(this);
     this.validation = this.validation.bind(this);
-
   }
   componentDidMount() {
     axios
@@ -51,17 +40,17 @@ export default class SignUp extends React.Component {
         console.log(error);
       });
   }
+
   validation() {
     // /^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/.test(myForm.emailAddr.value)
-    var isPassword=false;
-      if (this.state.confirmPassword === this.state.password) {
-        console.log("user password validated");
-        isPassword= true;
-      } else {
-        console.log("user password not validated");
-        isPassword= false;
-      }
-    
+    var isPassword = false;
+    if (this.state.confirmPassword === this.state.password) {
+      console.log("user password validated");
+      isPassword = true;
+    } else {
+      console.log("user password not validated");
+      isPassword = false;
+    }
 
     const isDuplicate = this.state.usersCollection.map((user) => {
       if (user.email === this.state.email) {
@@ -83,35 +72,37 @@ export default class SignUp extends React.Component {
 
   handleSubmit(e) {
     e.preventDefault();
-const valid=this.validation;
+    const valid = this.validation;
     if (valid) {
-      
-      const user = {
+      const formData = {
         firstName: this.state.firstName,
         lastName: this.state.lastName,
         email: this.state.email,
         password: this.state.password,
       };
 
-      axios
-        .post("http://localhost:5000/user/signup", user)
-        .then((res) => console.log(res.data));
-
-      window.location = "/sidebar";
-    }
-    else{
+      axios.post("http://localhost:5000/user/signup", formData).then((res) => {
+        console.log(res.data);
+        const queryParams = new URLSearchParams(`?id=${res.data._id}`);
+        window.location = `/Home?${queryParams}`;
+      });
+    } else {
       console.log("data not uploaded");
-    }}
-  
+    }
+  }
+
   handleChange(e) {
     this.setState({
       [e.target.name]: e.target.value,
     });
+    console.log(this.state.profilePhoto);
   }
   render() {
     return (
       <Container component="main" maxWidth="xs">
         <Box
+          component={"form"}
+          encType="multipart/form-data"
           sx={{
             marginTop: 8,
             display: "flex",
@@ -119,9 +110,18 @@ const valid=this.validation;
             alignItems: "center",
           }}
         >
-          <Avatar sx={{ m: 1, bgcolor: "secondary.main" }}>
-            <LockOutlinedIcon />
-          </Avatar>
+          <Button variant="ghost" component="label">
+            <Avatar sx={{ width: 80, height: 80, bgcolor: "secondary.main" }} />
+            <input
+              type="file"
+              hidden
+              filename="profilePhoto"
+              onChange={(e) => {
+                this.setState({ profilePhoto: e.target.files[0] });
+              }}
+            />
+          </Button>
+
           <Typography component="h1" variant="h5">
             Sign up
           </Typography>

@@ -1,20 +1,17 @@
 import * as React from "react";
 import axios from "axios";
-import queryString from "query-string"
-import { io } from "socket.io-client";
 import {
   Avatar,
   Button,
   TextField,
-  FormControlLabel,
-  Checkbox,
   Link,
   Grid,
   Box,
   Typography,
-  Container,
+  
 } from "@mui/material";
 import LockOutlinedIcon from "@mui/icons-material/LockOutlined";
+import startScreen from "./startScreen.jpg";
 
 export default class SignIn extends React.Component {
   constructor(props) {
@@ -22,6 +19,7 @@ export default class SignIn extends React.Component {
     this.state = {
       email: "",
       password: "",
+      userId: "",
       usersCollection: [],
     };
 
@@ -30,20 +28,17 @@ export default class SignIn extends React.Component {
     this.validation = this.validation.bind(this);
   }
   componentDidMount() {
-   
-    
-    
     axios
       .get("http://localhost:5000/user")
-      .then((res) => {const data=res.data;
+      .then((res) => {
+        const data = res.data;
         this.setState({ usersCollection: data });
-        
       })
       .catch(function (error) {
         console.log(error);
       });
 
-      console.log(this.state.usersCollection);
+    console.log(this.state.usersCollection);
   }
   validation() {
     // /^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/.test(myForm.emailAddr.value)
@@ -52,6 +47,10 @@ export default class SignIn extends React.Component {
         user.email === this.state.email &&
         user.password === this.state.password
       ) {
+        this.setState({
+          userId: user._id,
+        });
+
         console.log("user valid ");
         return true;
       } else {
@@ -65,24 +64,16 @@ export default class SignIn extends React.Component {
     e.preventDefault();
 
     const valid = this.validation();
-    if (true) {
+    if (valid) {
       const user = {
         email: this.state.email,
         password: this.state.password,
       };
-      axios
-        .post("http://localhost:5000/user/signin", user)
-        .then((res) => console.log(res.params.email));
-        const queryParams = new URLSearchParams(`?email=${user.email}`)
-
-      window.location = `/sidebar?${queryParams}`;
-
-      // this.socket = io("ws://localhost:8900");
-
-      // this.socket.on("welcome", (message) => {
-      //   console.log(message);
-      //   console.log("hello");
-      // });
+      axios.post("http://localhost:5000/user/signin", user).then((res) => {
+        console.log(res.data);
+        const queryParams = new URLSearchParams(`?id=${this.state.userId}`);
+        window.location = `/Home?${queryParams}`;
+      });
     } else {
       console.log("data not uploaded");
     }
@@ -95,73 +86,89 @@ export default class SignIn extends React.Component {
 
   render() {
     return (
-      <Container component="main" maxWidth="xs">
+      
+      <Box sx={{
+        display: "flex",
+        flexDirection:"row",
+        justifyContent:"center",
+        alignContent:"center",backgroundColor:"#ffeeea", height: "78em"      
+        
+      }}>
         <Box
           sx={{
-            marginTop: 8,
-            display: "flex",
-            flexDirection: "column",
-            alignItems: "center",
+            display: "inline-flex",
+           
           }}
         >
-          <Avatar sx={{ m: 1, bgcolor: "secondary.main" }}>
-            <LockOutlinedIcon />
-          </Avatar>
-          <Typography component="h1" variant="h5">
-            Sign in
-          </Typography>
           <Box
-            component="form"
-           
-            noValidate
-            sx={{ mt: 1 }}
+            sx={{
+              marginTop: 8,
+              display: "flex",
+              flexDirection: "column",
+              alignItems: "center",
+              paddingRight:"10%",
+              width:"max-content"
+            }}
           >
-            <TextField
-              margin="normal"
-              required
-              fullWidth
-              id="email"
-              label="Email Address"
-              name="email"
-              autoComplete="email"
-              autoFocus
-              onChange={this.handleChange}
-            />
-            <TextField
-              margin="normal"
-              required
-              fullWidth
-              name="password"
-              label="Password"
-              type="password"
-              id="password"
-              autoComplete="current-password"
-              onChange={this.handleChange}
-            />
-            
-            <Button
-              type="submit"
-              fullWidth
-              variant="contained"
-              sx={{ mt: 3, mb: 2 }} onClick={this.handleSubmit}
-            >
-              Sign In
-            </Button>
-            <Grid container>
-              <Grid item xs>
-                <Link href="#" variant="body2">
-                  Forgot password?
-                </Link>
+            <Avatar sx={{ m: 1, bgcolor: "secondary.main" }}>
+              <LockOutlinedIcon />
+            </Avatar>
+            <Typography component="h1" variant="h5">
+              Sign in
+            </Typography>
+            <Box component="form" noValidate sx={{ mt: 1 }}>
+              <TextField
+                margin="normal"
+                required
+                fullWidth
+                id="email"
+                label="Email Address"
+                name="email"
+                autoComplete="email"
+                autoFocus
+                onChange={this.handleChange}
+              />
+              <TextField
+                margin="normal"
+                required
+                fullWidth
+                name="password"
+                label="Password"
+                type="password"
+                id="password"
+                autoComplete="current-password"
+                onChange={this.handleChange}
+              />
+
+              <Button
+                type="submit"
+                fullWidth
+                variant="contained"
+                sx={{ mt: 3, mb: 2 }}
+                onClick={this.handleSubmit}
+              >
+                Sign In
+              </Button>
+              <Grid container>
+                <Grid item xs>
+                  <Link href="#" variant="body2">
+                    Forgot password?
+                  </Link>
+                </Grid>
+                <Grid item>
+                  <Link href="signup" variant="body2">
+                    {"Don't have an account? Sign Up"}
+                  </Link>
+                </Grid>
               </Grid>
-              <Grid item>
-                <Link href="signup" variant="body2">
-                  {"Don't have an account? Sign Up"}
-                </Link>
-              </Grid>
-            </Grid>
+            </Box>
+          </Box>
+          <Box >
+            <img src={startScreen} width={700} height={700} alt=""/>
           </Box>
         </Box>
-      </Container>
+      </Box>
+      
     );
   }
 }

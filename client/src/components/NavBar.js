@@ -1,185 +1,288 @@
-import { React, Component } from "react";
-import AdbIcon from "@mui/icons-material/Adb";
-import MenuIcon from "@mui/icons-material/Menu";
+import React, { Component } from "react";
+
+import "whatwg-fetch";
 import {
   Box,
   IconButton,
   Avatar,
-  Modal,
-  Typography,
-  Button,
+  Link,
   AppBar,
-  Toolbar,
-  Menu,
-  Container,
-  Tooltip,
-  MenuItem,
 } from "@mui/material";
-const pages = ["Add Friend", "Remove Friend"];
-
+import AdbIcon from "@mui/icons-material/Adb";
+import { BsFillChatFill } from "react-icons/bs";
+import { IoChatbubbles } from "react-icons/io5";
+import { FaUserFriends } from "react-icons/fa";
 export default class NavBar extends Component {
-  constructor() {
-    super();
+  constructor(props) {
+    super(props);
     this.state = {
+      openChat: false,
+      openGroupChat: false,
+      openContact: false,
       openMenu: false,
       openAddFriend: false,
       openRemoveFriend: false,
       openAccountSetting: false,
+      requestedFriend: "",
     };
-  }
 
+    this.handleChange = this.handleChange.bind(this);
+  }
+  handleChange(e) {
+    this.setState({
+      [e.target.name]: e.target.value,
+    });
+  }
   render() {
     return (
-      <AppBar position="static">
-        <Container maxWidth="xl">
-          <Toolbar disableGutters>
-            <AdbIcon sx={{ display: { xs: "none", md: "flex" }, mr: 1 }} />
-            <Typography
-              variant="h6"
-              noWrap
-              component="a"
-              href="/"
-              sx={{
-                mr: 2,
-                display: { xs: "none", md: "flex" },
-                fontFamily: "monospace",
-                fontWeight: 700,
-                letterSpacing: ".3rem",
-                color: "inherit",
-                textDecoration: "none",
-              }}
-            >
-              LOGO
-            </Typography>
+      <Box
+        width={"3rem"}
+        sx={{
+          display: "inline-flex",
+          backgroundColor: "#081c34",
+          alignContent: "center",
+          justifyContent: "center",
+          borderRadius:"2%"
+        }}
+      >
+        <AppBar
+          position="static"
+          sx={{
+            float: "left",
+            display: "flex",
+            flexDirection: "column",
+            width: "3rem",
+            minHeight: "100vh",
+            justifyItems: "center",
+            alignItems: "center",
+            backgroundColor: "#081c34",
+          }}
+        >
+          <Box sx={{ display: "flex", mt: 3 }}>
+            <AdbIcon />
+          </Box>
 
-            <Box sx={{ flexGrow: 1, display: { xs: "flex", md: "none" } }}>
+          <Box
+            sx={{
+              flexGrow: 1,
+              display: "flex",
+              flexDirection: "column",
+              justifyContent: "space-evenly",
+            }}
+          >
+            <Link
+              href={`Chat?id=${this.props.currentUser._id}`}
+              variant="body2"
+            >
               <IconButton
                 size="large"
                 aria-label="account of current user"
                 aria-controls="menu-appbar"
                 aria-haspopup="true"
                 onClick={() => {
-                  this.setState({ openMenu: true });
+                  this.setState({ openChat: true });
                 }}
                 color="inherit"
               >
-                <MenuIcon />
+                <BsFillChatFill size={"1em"} />
               </IconButton>
-              <Menu
-                id="menu-appbar"
-                anchorOrigin={{
-                  vertical: "bottom",
-                  horizontal: "left",
-                }}
-                keepMounted
-                transformOrigin={{
-                  vertical: "top",
-                  horizontal: "left",
-                }}
-                open={this.state.openMenu}
-                onClose={() => {
-                  this.setState({ openMenu: false });
-                }}
-                sx={{
-                  display: { xs: "block", md: "none" },
-                }}
-              >
-                {pages.map((page) => (
-                  <MenuItem
-                    key={page}
-                    onClick={() => {
-                      this.setState({ openMenu: false });
-                    }}
-                  >
-                    <Typography textAlign="center">{page}</Typography>
-                  </MenuItem>
-                ))}
-              </Menu>
-            </Box>
-            <AdbIcon sx={{ display: { xs: "flex", md: "none" }, mr: 1 }} />
-            <Typography
-              variant="h5"
-              noWrap
-              component="a"
-              href=""
-              sx={{
-                mr: 2,
-                display: { xs: "flex", md: "none" },
-                flexGrow: 1,
-                fontFamily: "monospace",
-                fontWeight: 700,
-                letterSpacing: ".3rem",
-                color: "inherit",
-                textDecoration: "none",
-              }}
+            </Link>
+            <Link
+              href={`GroupChat?id=${this.props.currentUser._id}`}
+              variant="body2"
             >
-              LOGO
-            </Typography>
-            <Box sx={{ flexGrow: 1, display: { xs: "none", md: "flex" } }}>
-              <Button
-                onClick={this.props.AddFriend}
-                sx={{ my: 2, color: "white", display: "block" }}
-              >
-                {pages[0]}
-              </Button>
-              <Button
-                onClick={this.props.RemoveFriend}
-
-                sx={{ my: 2, color: "white", display: "block" }}
-              >
-                {pages[1]}
-              </Button>
-            </Box>
-
-            <Box sx={{ flexGrow: 0 }}>
-              <Tooltip title="Open settings">
-                <IconButton
-                  onClick={() => {
-                    this.setState({ openAccountSetting: true });
-                  }}
-                  sx={{ p: 0 }}
-                >
-                  <Avatar alt="Remy Sharp" src="/static/images/avatar/2.jpg" />
-                </IconButton>
-              </Tooltip>
-              <Modal
-                open={this.state.openAccountSetting}
-                onClose={() => {
-                  this.setState({ openAccountSetting: false });
+              <IconButton
+                size="large"
+                aria-label="account of current user"
+                aria-controls="menu-appbar"
+                aria-haspopup="true"
+                onClick={() => {
+                  this.setState({ openGroupChat: true });
                 }}
-                aria-labelledby="modal-modal-title"
-                aria-describedby="modal-modal-description"
+                color="inherit"
               >
-                <Box
-                  sx={{
-                    position: "absolute",
-                    top: "50%",
-                    left: "50%",
-                    transform: "translate(-50%, -50%)",
-                    width: 400,
-                    bgcolor: "background.paper",
-                    border: "2px solid #000",
-                    boxShadow: 24,
-                    p: 4,
-                  }}
-                >
-                  <Typography
-                    id="modal-modal-title"
-                    variant="h6"
-                    component="h2"
-                  >
-                    Text in a modal
-                  </Typography>
-                  <Typography id="modal-modal-description" sx={{ mt: 2 }}>
-                    Duis mollis, est non commodo luctus, nisi erat porttitor
-                    ligula.
-                  </Typography>
-                </Box>
-              </Modal>
-            </Box>
-          </Toolbar>
-        </Container>
-      </AppBar>
+                <IoChatbubbles size={"1em"} />
+              </IconButton>
+            </Link>
+            <Link
+              href={`Contacts?id=${this.props.currentUser._id}`}
+              variant="body2"
+            >
+              <IconButton
+                size="large"
+                aria-label="account of current user"
+                aria-controls="menu-appbar"
+                aria-haspopup="true"
+                onClick={() => {
+                  this.setState({ openContact: true });
+                }}
+                color="inherit"
+              >
+                <FaUserFriends size={"1em"} />
+              </IconButton>
+            </Link>
+            <Link
+              href={`Account?id=${this.props.currentUser._id}`}
+              variant="body2"
+            >
+              <IconButton
+                onClick={() => {
+                  this.setState({ openAccountSetting: true });
+                }}
+                
+              >
+                <Avatar alt="Remy Sharp" src="/static/images/avatar/2.jpg" />
+              </IconButton>
+            </Link>
+          </Box>
+        </AppBar>
+      </Box>
     );
   }
 }
+// {
+//   /* <Modal
+//             open={this.state.openAccountSetting}
+//             onClose={() => {
+//               this.setState({ openAccountSetting: false });
+//             }}
+//           aria-labelledby="modal-modal-title"
+//           aria-describedby="modal-modal-description"
+//         >
+//           <Box
+//             sx={{
+//               position: "absolute",
+//               top: "50%",
+//               left: "50%",
+//               transform: "translate(-50%, -50%)",
+//               width: 400,
+//               bgcolor: "background.paper",
+//               border: "2px solid #000",
+//               boxShadow: 24,
+//               p: 4,
+//             }}
+//           >
+//             <Box>
+//               <Avatar alt="Remy Sharp" src="/static/images/avatar/2.jpg" />
+//             </Box>
+//             {this.props.user.pendingRequest?.map((id) => {
+//               var user = this.getUser(id);
+//               return (
+//                 <ListItem>
+//                   <ListItemAvatar>
+//                     <Avatar
+//                       alt="Remy Sharp"
+//                       src="/static/images/avatar/1.jpg"
+//                       sx={{ height: 46, width: 46 }}
+//                     />
+//                   </ListItemAvatar>
+//                   <ListItemText
+//                     primary={`${user.firstName} ${user.lastName}`}
+//                   />
+//                   <Box
+//                     sx={{
+//                       display: "inline-flex",
+//                       justifyContent: "space-between",
+//                     }}
+//                   >
+//                     <Button
+//                       edge="end"
+//                       aria-label="add"
+//                       variant="contained"
+//                       onClick={(e) => this.acceptRequest(e, user._id)}
+//                     >
+//                       <PersonAddIcon />
+//                     </Button>
+//                     <Button
+//                       edge="end"
+//                       aria-label="add"
+//                       variant="contained"
+//                       onClick={(e) => this.declineRequest(e, user._id)}
+//                     >
+//                       <PersonRemoveIcon />
+//                     </Button>
+//                   </Box>
+//                 </ListItem>
+//               );
+//             })}
+//           </Box>
+//         </Modal>
+//         <Modal
+//           open={this.state.openAddFriend}
+//           onClose={() => {
+//             this.setState({ openAddFriend: false });
+//           }}
+//           aria-labelledby="modal-modal-title"
+//           aria-describedby="modal-modal-description"
+//         >
+//           <Box
+//             sx={{
+//               position: "absolute",
+//               top: "50%",
+//               left: "50%",
+//               transform: "translate(-50%, -50%)",
+//               width: 400,
+//               bgcolor: "background.paper",
+//               border: "2px solid #000",
+//               boxShadow: 24,
+//               p: 4,
+//             }}
+//           >
+//             <Typography id="modal-modal-title" variant="h6" component="h2">
+//               Search for a friend
+//             </Typography>
+//             <TextField
+//               margin="normal"
+//               required
+//               fullWidth
+//               id="email"
+//               placeholder="Enter Your Friends Email"
+//               label="Email Address"
+//               name="requestedFriend"
+//               autoComplete="email"
+//               autoFocus
+//               onChange={this.handleChange}
+//             />
+//             <Button onClick={this.addFriend}>Hello</Button>
+//           </Box>
+//         </Modal>
+//         <Modal
+//           open={this.state.openRemoveFriend}
+//           onClose={() => {
+//             this.setState({ openRemoveFriend: false });
+//           }}
+//           aria-labelledby="modal-modal-title"
+//           aria-describedby="modal-modal-description"
+//         >
+//           <Box
+//             sx={{
+//               position: "absolute",
+//               top: "50%",
+//               left: "50%",
+//               transform: "translate(-50%, -50%)",
+//               width: 400,
+//               bgcolor: "background.paper",
+//               border: "2px solid #000",
+//               boxShadow: 24,
+//               p: 4,
+//             }}
+//           >
+//             <Typography id="modal-modal-title" variant="h6" component="h2">
+//               Search for a friend To cancel
+//             </Typography>
+//             <TextField
+//               margin="normal"
+//               required
+//               fullWidth
+//               id="email"
+//               placeholder="Enter Your Friends Email"
+//               label="Email Address"
+//               name="requestedFriend"
+//               autoComplete="email"
+//               autoFocus
+//               onChange={this.handleChange}
+//             />{" "}
+//             <Button onClick={this.removeFriend}>Hello</Button>
+//           </Box>
+//         </Modal> */
+// }
