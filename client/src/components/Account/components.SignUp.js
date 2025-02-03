@@ -117,7 +117,9 @@ export default class SignUp extends React.Component {
               hidden
               filename="profilePhoto"
               onChange={(e) => {
+
                 this.setState({ profilePhoto: e.target.files[0] });
+
               }}
             />
           </Button>

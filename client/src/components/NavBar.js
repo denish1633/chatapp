@@ -36,41 +36,52 @@ export default class NavBar extends Component {
   render() {
     return (
       <Box
-        width={"3rem"}
+
         sx={{
           display: "inline-flex",
-          backgroundColor: "#081c34",
           alignContent: "center",
           justifyContent: "center",
-          borderRadius:"2%"
+          borderRadius: "2%",
+          backgroundColor: "transparent"
+
         }}
       >
         <AppBar
           position="static"
           sx={{
-            float: "left",
             display: "flex",
-            flexDirection: "column",
+            flexDirection: "row",
             width: "3rem",
-            minHeight: "100vh",
             justifyItems: "center",
             alignItems: "center",
-            backgroundColor: "#081c34",
+            backgroundColor: "transparent"
           }}
         >
-          <Box sx={{ display: "flex", mt: 3 }}>
-            <AdbIcon />
-          </Box>
+
 
           <Box
             sx={{
               flexGrow: 1,
               display: "flex",
-              flexDirection: "column",
+              flexDirection: "row",
               justifyContent: "space-evenly",
             }}
           >
+
             <Link
+              href={`Account?id=${this.props.currentUser._id}`}
+              variant="body2"
+            >
+              <IconButton
+                onClick={() => {
+                  this.setState({ openAccountSetting: true });
+                }}
+
+              >
+                <Avatar alt="Remy Sharp" src="/static/images/avatar/2.jpg"  sx={{ width: 56, height: 56 }}/>
+              </IconButton>
+            </Link>
+            {/* <Link
               href={`Chat?id=${this.props.currentUser._id}`}
               variant="body2"
             >
@@ -86,8 +97,8 @@ export default class NavBar extends Component {
               >
                 <BsFillChatFill size={"1em"} />
               </IconButton>
-            </Link>
-            <Link
+            </Link> */}
+            {/* <Link
               href={`GroupChat?id=${this.props.currentUser._id}`}
               variant="body2"
             >
@@ -120,20 +131,8 @@ export default class NavBar extends Component {
               >
                 <FaUserFriends size={"1em"} />
               </IconButton>
-            </Link>
-            <Link
-              href={`Account?id=${this.props.currentUser._id}`}
-              variant="body2"
-            >
-              <IconButton
-                onClick={() => {
-                  this.setState({ openAccountSetting: true });
-                }}
-                
-              >
-                <Avatar alt="Remy Sharp" src="/static/images/avatar/2.jpg" />
-              </IconButton>
-            </Link>
+            </Link> */}
+
           </Box>
         </AppBar>
       </Box>

@@ -15,6 +15,7 @@ import {
   InputAdornment,
   Input,
   TextField,
+  Button
 } from "@mui/material";
 import TimeAgo from "react-timeago";
 import {TiContacts} from "react-icons/ti";
@@ -30,6 +31,7 @@ export default class PrivateChat extends Component {
       requestedFriend: "",
       currentUser: {},
       messageNotification: [],
+      viewAccount:false
     };
 
     this.handleSubmit = this.handleSubmit.bind(this);
@@ -176,48 +178,79 @@ export default class PrivateChat extends Component {
     return (
       <Box
         sx={{
-          display: "inline-flex",
+          display: "flex",
           width: "100%",
           justifyContent: "center",
           alignContent: "center",
           
         }}
       >
-        <NavBar currentUser={this.state.currentUser} />
-        <Box sx={{ display: "inline-flex", width: "100%",alignItems:"center" }}>
+        
+        <Box sx={{ display: "flex", width: "100%",alignItems:"center" }}>
+        
           <List
             sx={{
-              width: "322px",
+              width: "3 0vw",
               height: "100vh",
-              backgroundColor: "rgb(48,56,65)",
+              backgroundColor: "#1F1D1D",
             }}
           >
-            <Typography color="white" fontSize={25} paddingLeft={1}>
-              Chats
-            </Typography>
-
+            
+            <NavBar currentUser={this.state.currentUser} />
             <Box display={"inline-flex"} width={"100%"}>
-              <TextField
-                id="input-with-icon-textfield"
-                sx={{ width: "100%" }}
-                InputProps={{
-                  startAdornment: (
-                    <InputAdornment position="start">
-                      <MdSearch size={"1.5em"} />
-                    </InputAdornment>
-                  ),
-                }}
-                variant="standard"
-              />
-              <TiContacts
+            <TextField
+      id="input-with-icon-textfield"
+      variant="filled"
+      sx={{
+        width: "100%",
+        background: "#312F2F",
+        borderRadius: "5%",
+        padding: 0,
+        "& label": {
+          transition: "none", // Remove label animation
+          color: "grey", // Label text color
+        },
+        "& .MuiInputBase-root": {
+          transition: "none", // Remove input transition
+          color: "grey", // Input text color
+        },
+        "& .MuiInputBase-input": {
+          color: "grey", // Ensures the actual text inside the input is grey
+        },
+        "& .MuiInputBase-root::before, & .MuiInputBase-root::after": {
+          transition: "none !important", // Remove underline animation
+          display: "none", // Hide focus underline
+        },
+        "& .MuiInputAdornment-root": {
+          transition: "none", // Remove icon transition
+        },
+        "& .MuiFilledInput-root": {
+          backgroundColor: "#312F2F",
+        },
+        "& .MuiFilledInput-root:focus, & .MuiFilledInput-root.Mui-focused": {
+          backgroundColor: "#312F2F", // Keep background color on focus
+          boxShadow: "none", // Remove any glow effect
+        },
+      }}
+      InputProps={{
+        startAdornment: (
+          <InputAdornment position="start">
+            <MdSearch size={"1.5em"} color="grey" /> {/* Change icon color to grey */}
+          </InputAdornment>
+        ),
+      }}
+    />
+              {/* <TiContacts
               size={"2em"}
-                onClick={() => {
+                onClick={() => { 
+
+                  
                   const queryParams = new URLSearchParams(
                     `?id=${this.state.currentUser._id}`
                   );
                   window.location = `/Contacts?${queryParams}`;
                 }}
-              />
+              /> */}
             </Box>
             {this.state.currentUser.userFriend?.map((friend, index) => {
               var user = this.getUser(friend.friendId);
@@ -239,7 +272,7 @@ export default class PrivateChat extends Component {
                 >
                   <ListItemAvatar>
                     <Avatar
-                      alt="Remy Sharp"
+                      alt={user.firstName.toUpperCase()}
                       src="/static/images/avatar/1.jpg"
                       sx={{ height: 46, width: 46 }}
                     />
@@ -287,8 +320,8 @@ export default class PrivateChat extends Component {
                       sx={{ fontSize: "15px", color: "lightgray" }}
                       noWrap
                     >
-                      last message
-                    </Typography>
+                        {this.state.messageHistory[1]}
+                        </Typography>
                   </Box>
                 </Box>
               );
@@ -370,14 +403,14 @@ export default class PrivateChat extends Component {
                     placeholder="Type a message"
                   />
 
-                  {/* <TextField
+                   <TextField
                     id="outlined"
                     label="Send Message"
                     name="message"
                     onChange={this.handleChange}
                     sx={{ width: "100%" }}
                   />
-                  <Button onClick={this.handleSubmit}>Send</Button> */}
+                  <Button onClick={this.handleSubmit}>Send</Button> 
                 </Box>
               </Box>
             </Box>
