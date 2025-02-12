@@ -72,24 +72,31 @@ export default class SignUp extends React.Component {
 
   handleSubmit(e) {
     e.preventDefault();
-    const valid = this.validation;
-    if (valid) {
-      const formData = {
-        firstName: this.state.firstName,
-        lastName: this.state.lastName,
-        email: this.state.email,
-        password: this.state.password,
-      };
+    const formData = new FormData();
+    formData.append("firstName", this.state.firstName);
+    formData.append("lastName", this.state.lastName);
+    formData.append("email", this.state.email);
+    formData.append("password", this.state.password);
+    formData.append("profilePhoto", this.state.profilePhoto);
 
-      axios.post("http://localhost:5000/user/signup", formData).then((res) => {
-        console.log(res.data);
-        const queryParams = new URLSearchParams(`?id=${res.data._id}`);
-        window.location = `/Home?${queryParams}`;
+    console.log("Sending signup request with data:", formData);
+
+    axios
+      .post("http://localhost:5000/user/signup", formData, {
+        headers: { "Content-Type": "multipart/form-data" },
+      })
+      .then((res) => {
+        console.log("Signup success:", res.data);
+        window.location = `/Home?id=${res.data._id}`;
+      })
+      .catch((err) => {
+        console.error("Upload failed:", err);
       });
-    } else {
-      console.log("data not uploaded");
-    }
+
+
   }
+
+
 
   handleChange(e) {
     this.setState({
@@ -111,18 +118,22 @@ export default class SignUp extends React.Component {
           }}
         >
           <Button variant="ghost" component="label">
-            <Avatar sx={{ width: 80, height: 80, bgcolor: "secondary.main" }} />
+            <Avatar
+              sx={{ width: 80, height: 80, bgcolor: "secondary.main" }}
+              src={this.state.profilePhoto ? URL.createObjectURL(this.state.profilePhoto) : ""}
+            />
             <input
               type="file"
               hidden
-              filename="profilePhoto"
+              accept="image/*" // ✅ Restrict file types
               onChange={(e) => {
-
-                this.setState({ profilePhoto: e.target.files[0] });
-
+                if (e.target.files[0]) {
+                  this.setState({ profilePhoto: e.target.files[0] }); // ✅ Save file
+                }
               }}
             />
           </Button>
+
 
           <Typography component="h1" variant="h5">
             Sign up

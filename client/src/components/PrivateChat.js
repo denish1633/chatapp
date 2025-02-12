@@ -18,7 +18,7 @@ import {
   Button
 } from "@mui/material";
 import TimeAgo from "react-timeago";
-import {TiContacts} from "react-icons/ti";
+import { TiContacts } from "react-icons/ti";
 export default class PrivateChat extends Component {
   constructor(props) {
     super(props);
@@ -31,7 +31,7 @@ export default class PrivateChat extends Component {
       requestedFriend: "",
       currentUser: {},
       messageNotification: [],
-      viewAccount:false
+      viewAccount: false
     };
 
     this.handleSubmit = this.handleSubmit.bind(this);
@@ -123,7 +123,8 @@ export default class PrivateChat extends Component {
       roomId: friend.roomId,
     });
     this.getOldChat(friend.roomId);
-    console.log("room joined!!!");
+    console.log(friend.roomId);
+
   }
   componentDidMount() {
     this.getUserData();
@@ -182,12 +183,12 @@ export default class PrivateChat extends Component {
           width: "100%",
           justifyContent: "center",
           alignContent: "center",
-          
+
         }}
       >
-        
-        <Box sx={{ display: "flex", width: "100%",alignItems:"center" }}>
-        
+
+        <Box sx={{ display: "flex", width: "100%", alignItems: "center" }}>
+
           <List
             sx={{
               width: "3 0vw",
@@ -195,51 +196,51 @@ export default class PrivateChat extends Component {
               backgroundColor: "#1F1D1D",
             }}
           >
-            
+
             <NavBar currentUser={this.state.currentUser} />
             <Box display={"inline-flex"} width={"100%"}>
-            <TextField
-      id="input-with-icon-textfield"
-      variant="filled"
-      sx={{
-        width: "100%",
-        background: "#312F2F",
-        borderRadius: "5%",
-        padding: 0,
-        "& label": {
-          transition: "none", // Remove label animation
-          color: "grey", // Label text color
-        },
-        "& .MuiInputBase-root": {
-          transition: "none", // Remove input transition
-          color: "grey", // Input text color
-        },
-        "& .MuiInputBase-input": {
-          color: "grey", // Ensures the actual text inside the input is grey
-        },
-        "& .MuiInputBase-root::before, & .MuiInputBase-root::after": {
-          transition: "none !important", // Remove underline animation
-          display: "none", // Hide focus underline
-        },
-        "& .MuiInputAdornment-root": {
-          transition: "none", // Remove icon transition
-        },
-        "& .MuiFilledInput-root": {
-          backgroundColor: "#312F2F",
-        },
-        "& .MuiFilledInput-root:focus, & .MuiFilledInput-root.Mui-focused": {
-          backgroundColor: "#312F2F", // Keep background color on focus
-          boxShadow: "none", // Remove any glow effect
-        },
-      }}
-      InputProps={{
-        startAdornment: (
-          <InputAdornment position="start">
-            <MdSearch size={"1.5em"} color="grey" /> {/* Change icon color to grey */}
-          </InputAdornment>
-        ),
-      }}
-    />
+              <TextField
+                id="input-with-icon-textfield"
+                variant="filled"
+                sx={{
+                  width: "100%",
+                  background: "#312F2F",
+                  borderRadius: "5%",
+                  padding: 0,
+                  "& label": {
+                    transition: "none", // Remove label animation
+                    color: "grey", // Label text color
+                  },
+                  "& .MuiInputBase-root": {
+                    transition: "none", // Remove input transition
+                    color: "grey", // Input text color
+                  },
+                  "& .MuiInputBase-input": {
+                    color: "grey", // Ensures the actual text inside the input is grey
+                  },
+                  "& .MuiInputBase-root::before, & .MuiInputBase-root::after": {
+                    transition: "none !important", // Remove underline animation
+                    display: "none", // Hide focus underline
+                  },
+                  "& .MuiInputAdornment-root": {
+                    transition: "none", // Remove icon transition
+                  },
+                  "& .MuiFilledInput-root": {
+                    backgroundColor: "#312F2F",
+                  },
+                  "& .MuiFilledInput-root:focus, & .MuiFilledInput-root.Mui-focused": {
+                    backgroundColor: "#312F2F", // Keep background color on focus
+                    boxShadow: "none", // Remove any glow effect
+                  },
+                }}
+                InputProps={{
+                  startAdornment: (
+                    <InputAdornment position="start">
+                      <MdSearch size={"1.5em"} color="grey" /> {/* Change icon color to grey */}
+                    </InputAdornment>
+                  ),
+                }}
+              />
               {/* <TiContacts
               size={"2em"}
                 onClick={() => { 
@@ -316,12 +317,12 @@ export default class PrivateChat extends Component {
                         time
                       </Typography>
                     </Box>
-                    <Typography
+                    {/* <Typography
                       sx={{ fontSize: "15px", color: "lightgray" }}
                       noWrap
                     >
-                        {this.state.messageHistory[1]}
-                        </Typography>
+                      {this.state.messageHistory[1]}
+                    </Typography> */}
                   </Box>
                 </Box>
               );
@@ -330,6 +331,7 @@ export default class PrivateChat extends Component {
           {this.state.roomId === "" ? (
             <h1>Select friend to chat with</h1>
           ) : (
+
             <Box
               width={"100%"}
               maxHeight={"80vh"}
@@ -338,6 +340,7 @@ export default class PrivateChat extends Component {
                 overflow: "hidden",
               }}
             >
+
               <Box
                 width={"100%"}
                 height={"100%"}
@@ -349,6 +352,7 @@ export default class PrivateChat extends Component {
                 }}
               >
                 {this.state.messageHistory.map((messages, index) => {
+
                   return (
                     <Box
                       sx={{
@@ -370,7 +374,10 @@ export default class PrivateChat extends Component {
                             : styleToMe
                         }
                       >
-                        <Typography>{messages.text}</Typography>
+                        <Typography key={index}>
+                          {messages.text}
+
+                        </Typography>
                       </Box>
                       <Box
                         sx={{
@@ -381,8 +388,10 @@ export default class PrivateChat extends Component {
                           width={"inherit"}
                           fontSize={"12px"}
                           color="gray"
+                          key={index}
                         >
                           <TimeAgo date={messages.date} />
+
                         </Typography>
                       </Box>
                     </Box>
@@ -403,17 +412,14 @@ export default class PrivateChat extends Component {
                     placeholder="Type a message"
                   />
 
-                   <TextField
-                    id="outlined"
-                    label="Send Message"
-                    name="message"
-                    onChange={this.handleChange}
-                    sx={{ width: "100%" }}
-                  />
-                  <Button onClick={this.handleSubmit}>Send</Button> 
+                  
                 </Box>
               </Box>
+
+
             </Box>
+
+
           )}
         </Box>
       </Box>

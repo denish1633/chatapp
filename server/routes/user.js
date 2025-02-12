@@ -3,20 +3,15 @@ const { v4: uuidv4 } = require("uuid");
 let newUser = require("../models/newUser.model");
 let existingUser = require("../models/existingUser.model");
 const multer = require("multer");
+const path = require("path");
 
 const storage = multer.diskStorage({
-  destination: function (req, file, cb) {
-    cb(null, "./client/public/uploads/");
-  },
-  filename: function (req, file, cb) {
-    console.log(file);
-
-    cb(null, file.originalname);
-  },
+  destination: "./uploads/", // Save to "uploads" folder
+  filename: (req, file, cb) => {
+    cb(null, file.fieldname + "-" + Date.now() + path.extname(file.originalname));
+  }
 });
-
-const upload = multer({ storage: storage }).single("profilePhoto");
-
+const upload = multer({ storage });
 router.route("/").get((req, res) => {
   newUser
     .find()
@@ -24,35 +19,35 @@ router.route("/").get((req, res) => {
     .catch((err) => res.status(400).json("Error: " + err));
 });
 
-router.route("/signup").post((req, res) => {
-  const firstName = req.body.firstName;
-  const lastName = req.body.lastName;
-  const email = req.body.email;
-  const password = req.body.password;
-  const userFriend = req.body.userFriend;
-  const pendingRequest = req.body.pendingRequest;
-  const roomId = req.body.roomId;
-  const socketId = req.body.socketId;
-  const newAddedUser = new newUser({
-    firstName,
-    lastName,
-    email,
-    password,
-    userFriend,
-    pendingRequest,
-    roomId,
-    socketId,
-  });
-  newAddedUser
-    .save()
-    .then(() => {
-      res.json(newAddedUser);
-    })
-    .catch((err) => {
-      res.status(400).json("Error: " + err);
-      console.log(err);
+router.post("/signup", upload.single("profilePhoto"), async (req, res) => {
+  console.log("Signup request received");
+  console.log("Request Body:", req.body);
+  console.log("Uploaded File:", req.file);
+
+  try {
+    const { firstName, lastName, email, password } = req.body;
+    if (!req.file) {
+      return res.status(400).json({ error: "No profile picture uploaded" });
+    }
+
+    const newAddedUser = new newUser({
+      firstName,
+      lastName,
+      email,
+      password,
+      profilePhoto: req.file.filename, // Save only filename
     });
+
+    await newAddedUser.save();
+    res.json(newAddedUser);
+  } catch (err) {
+    console.error("Signup error:", err);
+    res.status(500).json("Error: " + err);
+  }
 });
+
+
+
 router.route("/signin").post((req, res) => {
   const email = req.body.email;
   const password = req.body.password;
