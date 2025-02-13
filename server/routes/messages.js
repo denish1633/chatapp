@@ -31,7 +31,6 @@ router.route("/update/:id").post((req, res) => {
   newMessage
     .findById(req.params.id)
     .then((newUser) => {
-      console.log(req.body);
       newUser.messageHistory = req.body;
       
 

@@ -8,17 +8,16 @@ import { io } from "socket.io-client";
 import InputEmoji from "react-input-emoji";
 import {
   Box,
-  Avatar,
   Typography,
   ListItemAvatar,
   List,
   InputAdornment,
-  Input,
   TextField,
-  Button
+  Avatar,
 } from "@mui/material";
 import TimeAgo from "react-timeago";
-import { TiContacts } from "react-icons/ti";
+
+
 export default class PrivateChat extends Component {
   constructor(props) {
     super(props);
@@ -66,7 +65,7 @@ export default class PrivateChat extends Component {
   async updateUser(userObject) {
     await axios
       .post(`http://localhost:5000/user/update/${userObject._id}`, userObject)
-      .then((res) => console.log(res.data));
+      
   }
 
   async getOldChat(roomId) {
@@ -85,7 +84,7 @@ export default class PrivateChat extends Component {
   async addMessage(data) {
     await axios
       .post(`http://localhost:5000/message/update/${this.state.roomId}`, data)
-      .then((res) => console.log(res.data));
+      
     console.log("message added");
   }
   handleChange(e) {
@@ -110,7 +109,6 @@ export default class PrivateChat extends Component {
     this.setState({
       messageHistory: history,
     });
-    console.log(this.state.messageHistory);
     this.addMessage(this.state.messageHistory);
   }
   async startChat(friendUser, friend) {
@@ -123,7 +121,6 @@ export default class PrivateChat extends Component {
       roomId: friend.roomId,
     });
     this.getOldChat(friend.roomId);
-    console.log(friend.roomId);
 
   }
   componentDidMount() {
@@ -147,8 +144,6 @@ export default class PrivateChat extends Component {
   componentDidUpdate(prevProps, prevState) {
     if (this.state.currentUser._id !== prevState.currentUser._id) {
       this.getUserData();
-      console.log("usercollection", this.state.usersCollection);
-      console.log("current user", this.state.currentUser);
     }
     if (this.state.roomId) {
       this.getOldChat(this.state.roomId);
@@ -179,25 +174,30 @@ export default class PrivateChat extends Component {
     return (
       <Box
         sx={{
-          display: "flex",
+          display: "inline-flex",
           width: "100%",
-          justifyContent: "center",
-          alignContent: "center",
-
         }}
       >
+        <Box
+          sx={{
+            display: "inline-flex",
+            height: "100%",
+          }}
+        >
+          <NavBar currentUser={this.state.currentUser} />
+        </Box>
 
         <Box sx={{ display: "flex", width: "100%", alignItems: "center" }}>
 
           <List
             sx={{
-              width: "3 0vw",
+              maxWidth: "25vw",
               height: "100vh",
               backgroundColor: "#1F1D1D",
             }}
           >
 
-            <NavBar currentUser={this.state.currentUser} />
+
             <Box display={"inline-flex"} width={"100%"}>
               <TextField
                 id="input-with-icon-textfield"
@@ -206,7 +206,6 @@ export default class PrivateChat extends Component {
                   width: "100%",
                   background: "#312F2F",
                   borderRadius: "5%",
-                  padding: 0,
                   "& label": {
                     transition: "none", // Remove label animation
                     color: "grey", // Label text color
@@ -236,25 +235,21 @@ export default class PrivateChat extends Component {
                 InputProps={{
                   startAdornment: (
                     <InputAdornment position="start">
-                      <MdSearch size={"1.5em"} color="grey" /> {/* Change icon color to grey */}
+                      <MdSearch size={"1.8em"} color="grey" /> {/* Change icon color to grey */}
                     </InputAdornment>
                   ),
                 }}
               />
-              {/* <TiContacts
-              size={"2em"}
-                onClick={() => { 
-
-                  
-                  const queryParams = new URLSearchParams(
-                    `?id=${this.state.currentUser._id}`
-                  );
-                  window.location = `/Contacts?${queryParams}`;
-                }}
-              /> */}
+              
             </Box>
             {this.state.currentUser.userFriend?.map((friend, index) => {
               var user = this.getUser(friend.friendId);
+              
+              // var lastMessage= this.getOldChat(this.state.currentUser.userFriend.filter((fr) => {
+              //   return fr.friendId === friend.friendId;
+              // })[0].roomId);
+
+              // console.log(lastMessage);
               return (
                 <Box
                   key={index}
@@ -314,7 +309,7 @@ export default class PrivateChat extends Component {
                         }}
                         noWrap
                       >
-                        time
+                       
                       </Typography>
                     </Box>
                     {/* <Typography
@@ -333,8 +328,8 @@ export default class PrivateChat extends Component {
           ) : (
 
             <Box
-              width={"100%"}
-              maxHeight={"80vh"}
+              width={"70vw"}
+              height={"90vh"}
               margin={0}
               sx={{
                 overflow: "hidden",
@@ -356,7 +351,6 @@ export default class PrivateChat extends Component {
                   return (
                     <Box
                       sx={{
-                        padding: "10px",
                         display: "flex",
                         flexDirection: "column",
                         justifyContent: "flex-end",
@@ -400,8 +394,8 @@ export default class PrivateChat extends Component {
                 <Box
                   sx={{
                     display: "flex",
-                    flexDirection: "row",
-                    alignItems: "center",
+                    flexDirection: "column",
+                    justifyContent: "end",
                   }}
                 >
                   <InputEmoji
@@ -412,7 +406,7 @@ export default class PrivateChat extends Component {
                     placeholder="Type a message"
                   />
 
-                  
+
                 </Box>
               </Box>
 

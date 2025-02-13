@@ -8,10 +8,16 @@ import {
   Link,
   AppBar,
 } from "@mui/material";
-import AdbIcon from "@mui/icons-material/Adb";
-import { BsFillChatFill } from "react-icons/bs";
-import { IoChatbubbles } from "react-icons/io5";
-import { FaUserFriends } from "react-icons/fa";
+import {
+  IoHome,
+  IoSearchCircle,
+  IoHelpCircle,
+  IoSettings,
+  IoNotifications
+}
+  from "react-icons/io5";
+import { IoMdContact } from "react-icons/io";
+
 export default class NavBar extends Component {
   constructor(props) {
     super(props);
@@ -34,107 +40,117 @@ export default class NavBar extends Component {
     });
   }
   render() {
+
     return (
       <Box
-
         sx={{
-          display: "inline-flex",
+          display: "flex",
           alignContent: "center",
-          justifyContent: "center",
-          borderRadius: "2%",
-          backgroundColor: "transparent"
-
+          height: "100vh",
+          backgroundColor: "#111c5a",
+          flexDirection: "column"
         }}
       >
-        <AppBar
-          position="static"
-          sx={{
-            display: "flex",
-            flexDirection: "row",
-            width: "3rem",
-            justifyItems: "center",
-            alignItems: "center",
-            backgroundColor: "transparent"
-          }}
+        <Link
+          href={`Account?id=${this.props.currentUser?._id}`}
+          variant="body2"
         >
-
-
-          <Box
-            sx={{
-              flexGrow: 1,
-              display: "flex",
-              flexDirection: "row",
-              justifyContent: "space-evenly",
+          <IconButton
+            onClick={() => {
+              this.setState({ openAccountSetting: true });
             }}
           >
+            <Avatar alt="Remy Sharp" src={this.props.currentUser?.profilePic} sx={{ width: 56, height: 56, borderRadius: 2 }} variant="square" />
+          </IconButton>
+        </Link>
+        <Box sx={{ display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "end", height: "100%",marginBottom:"25%" }}>
+          <Link
+            href={`Home?id=${this.props.currentUser._id}`}
+            variant="body2"
+          >
+            <IconButton
+              onClick={() => {
+                this.setState({ openAccountSetting: true });
+              }}
 
-            <Link
-              href={`Account?id=${this.props.currentUser._id}`}
-              variant="body2"
             >
-              <IconButton
-                onClick={() => {
-                  this.setState({ openAccountSetting: true });
-                }}
+              <IoHome color="white" size={"1.2em"} />
+            </IconButton>
+          </Link>
 
-              >
-                <Avatar alt="Remy Sharp" src="/static/images/avatar/2.jpg"  sx={{ width: 56, height: 56 }}/>
-              </IconButton>
-            </Link>
-            {/* <Link
-              href={`Chat?id=${this.props.currentUser._id}`}
-              variant="body2"
-            >
-              <IconButton
-                size="large"
-                aria-label="account of current user"
-                aria-controls="menu-appbar"
-                aria-haspopup="true"
-                onClick={() => {
-                  this.setState({ openChat: true });
-                }}
-                color="inherit"
-              >
-                <BsFillChatFill size={"1em"} />
-              </IconButton>
-            </Link> */}
-            {/* <Link
-              href={`GroupChat?id=${this.props.currentUser._id}`}
-              variant="body2"
-            >
-              <IconButton
-                size="large"
-                aria-label="account of current user"
-                aria-controls="menu-appbar"
-                aria-haspopup="true"
-                onClick={() => {
-                  this.setState({ openGroupChat: true });
-                }}
-                color="inherit"
-              >
-                <IoChatbubbles size={"1em"} />
-              </IconButton>
-            </Link>
-            <Link
-              href={`Contacts?id=${this.props.currentUser._id}`}
-              variant="body2"
-            >
-              <IconButton
-                size="large"
-                aria-label="account of current user"
-                aria-controls="menu-appbar"
-                aria-haspopup="true"
-                onClick={() => {
-                  this.setState({ openContact: true });
-                }}
-                color="inherit"
-              >
-                <FaUserFriends size={"1em"} />
-              </IconButton>
-            </Link> */}
+          <Link
+            href={`Contact?id=${this.props.currentUser._id}`}
+            variant="body2"
+          >
+            <IconButton
+              onClick={() => {
+                this.setState({ openAccountSetting: true });
+              }}
 
-          </Box>
-        </AppBar>
+            >
+              <IoMdContact color="white" size={"1.2em"} />
+            </IconButton>
+          </Link>
+
+          <Link
+            href={`Search?id=${this.props.currentUser._id}`}
+            variant="body2"
+          >
+            <IconButton
+              onClick={() => {
+                this.setState({ openAccountSetting: true });
+              }}
+
+            >
+              <IoSearchCircle color="white" size={"1.2em"} />
+            </IconButton>
+          </Link>
+
+          <Link
+            href={`Notifications?id=${this.props.currentUser._id}`}
+            variant="body2"
+          >
+            <IconButton
+              onClick={() => {
+                this.setState({ openAccountSetting: true });
+              }}
+
+            >
+              <IoNotifications color="white" size={"1.2em"} />
+            </IconButton>
+          </Link>
+
+          <Link
+            href={`Settings?id=${this.props.currentUser._id}`}
+            variant="body2"
+          >
+            <IconButton
+              onClick={() => {
+                this.setState({ openAccountSetting: true });
+              }}
+
+            >
+              <IoSettings color="white" size={"1.2em"} />
+            </IconButton>
+          </Link>
+
+
+          <Link
+            href={`Help?id=${this.props.currentUser._id}`}
+            variant="body2"
+          >
+            <IconButton
+              onClick={() => {
+                this.setState({ openAccountSetting: true });
+              }}
+
+            >
+              <IoHelpCircle color="white" size={"1.2em"} />
+            </IconButton>
+          </Link>
+
+
+        </Box>
       </Box>
     );
   }
