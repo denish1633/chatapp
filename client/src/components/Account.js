@@ -42,7 +42,7 @@ class Account extends React.Component {
         const queryParams = queryString.parse(window.location.search);
 
         await axios
-            .get("http://localhost:5000/user")
+            .get("http://localhost:5001/user")
             .then((res) => {
                 this.setState({
                     usersCollection: res.data,
@@ -62,7 +62,7 @@ class Account extends React.Component {
     }
     async updateUser(userObject) {
         await axios
-            .post(`http://localhost:5000/user/update/${userObject._id}`, userObject)
+            .post(`http://localhost:5001/user/update/${userObject._id}`, userObject)
             .then((res) => console.log(res.data));
     }
     addFriend() {
@@ -136,7 +136,7 @@ class Account extends React.Component {
         this.updateUser(targetUser);
         var data = { _id: roomId, chatHistory: [] };
         axios
-            .post("http://localhost:5000/message/new", data)
+            .post("http://localhost:5001/message/new", data)
             .then((res) => console.log(res.data));
         console.log("message added");
     }

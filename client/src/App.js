@@ -7,10 +7,12 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import SignUp from "./components/Account/components.SignUp.js";
 import NoPage from "./components/Account/compomemts.NoPage.js";
 import SignIn from "./components/Account/components.SignIn.js";
-import ChatSideBar from "./components/chatSideBar.js";
+import ChatSideBar from "./components/ChatWindow.js";
 import PrivateChat from "./components/PrivateChat";
 import Contacts from "./components/Contacts";
 import Account from "./components/Account.js";
+import ChatHomeScreen from "./components/HomeScreen.js";
+import GroupChatScreen from "./components/GroupScreen.js";
 // import UploadImage from "./components/components.UploadImage";
 
 const theme = createTheme({
@@ -31,10 +33,11 @@ function App() {
             <Route path="Signup" element={<SignUp />} />
             <Route path="/" element={<SignIn />} />
             <Route path="*" element={<NoPage />} />
-            <Route path="Chat" element={<PrivateChat />} />
-            <Route path="Contacts" element={<Contacts />} />
-            <Route path="Home" element={<PrivateChat />} />
-            <Route path="Account" element={<Account />} />
+            <Route path="Chat" element={<ChatHomeScreen />} />
+            <Route path="Calls" element={<Contacts />} />
+            <Route path="Teams" element={<GroupChatScreen />} />
+            <Route path="Calendar" element={<Account />} />
+            <Route path="Files" element={<Account />} />
 
           </Route>
         </Routes>

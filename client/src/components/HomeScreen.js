@@ -70,6 +70,7 @@ import {
 import { v4 as uuidv4 } from "uuid";
 import { getToken, getUser, isAuthenticated, logout } from "./authUtils";
 import SidebarNav from "./NavBar";
+import ChatWindow from "./ChatWindow";
 
 export default class ChatHomeScreen extends Component {
   constructor() {
@@ -85,7 +86,7 @@ export default class ChatHomeScreen extends Component {
       friends: [],
       groups: [],
       pendingRequests: [],
-      
+
       // Enhanced features
       searchQuery: "",
       chatFilter: "all", // all, direct, groups, unread
@@ -97,26 +98,26 @@ export default class ChatHomeScreen extends Component {
       isRecording: false,
       showEmojiPicker: false,
       selectedFiles: [],
-      
+
       // Dialog states
       openAddFriend: false,
       openCreateGroup: false,
       openFriendRequests: false,
       openChatInfo: false,
       openScheduleMessage: false,
-      
+
       // Form states
       friendEmail: "",
       groupName: "",
       groupDescription: "",
       selectedMembers: [],
       scheduledTime: null,
-      
+
       // Menu states
       messageMenuAnchor: null,
       selectedMessageForMenu: null,
       chatOptionsAnchor: null,
-      
+
       // Loading states
       isLoadingMessages: false,
       isSendingMessage: false,
@@ -213,23 +214,41 @@ export default class ChatHomeScreen extends Component {
   }
 
   handleIncomingMessage(messageData) {
-    if (messageData.type === "message") {
-      this.getOldChat(this.state.roomId);
-    } else if (messageData.type === "messageDeleted") {
-      this.setState(prevState => ({
-        oldMessages: prevState.oldMessages.filter(m => m.id !== messageData.messageId)
-      }));
-    } else if (messageData.type === "messageEdited") {
-      this.setState(prevState => ({
-        oldMessages: prevState.oldMessages.map(m => 
-          m.id === messageData.messageId ? { ...m, text: messageData.text, edited: true } : m
-        )
-      }));
-    }
+  if (messageData.type === "message") {
+    this.setState((prevState) => ({
+      oldMessages: [...prevState.oldMessages, messageData],
+    }));
   }
 
+  if (messageData.type === "messageDeleted") {
+    this.setState((prevState) => ({
+      oldMessages: prevState.oldMessages.filter(
+        (m) => m.id !== messageData.messageId
+      ),
+    }));
+  }
+
+  if (messageData.type === "messageEdited") {
+    this.setState((prevState) => ({
+      oldMessages: prevState.oldMessages.map((m) =>
+        m.id === messageData.messageId
+          ? { ...m, text: messageData.text, edited: true }
+          : m
+      ),
+    }));
+  }
+}
+
+handleOpenMessageMenu = (event, message) => {
+  this.setState({
+    messageMenuAnchor: event.currentTarget,
+    selectedMessageForMenu: message,
+  });
+};
+
+
   updateUserPresence(presenceData) {
-    this.setState(prevState => {
+    this.setState((prevState) => {
       const onlineUsers = new Set(prevState.onlineUsers);
       if (presenceData.status === "online") {
         onlineUsers.add(presenceData.userId);
@@ -242,17 +261,17 @@ export default class ChatHomeScreen extends Component {
 
   updateTypingIndicator(typingData) {
     const { roomId, userId, isTyping } = typingData;
-    
-    this.setState(prevState => {
+
+    this.setState((prevState) => {
       const typingUsers = new Map(prevState.typingUsers);
       let roomTyping = typingUsers.get(roomId) || new Set();
-      
+
       if (isTyping) {
         roomTyping.add(userId);
       } else {
         roomTyping.delete(userId);
       }
-      
+
       typingUsers.set(roomId, roomTyping);
       return { typingUsers };
     });
@@ -260,10 +279,14 @@ export default class ChatHomeScreen extends Component {
 
   sendPresence(status) {
     if (this.stompClient && this.stompClient.connected) {
-      this.stompClient.send("/app/presence", {}, JSON.stringify({
-        userId: this.state.currentUser.id,
-        status: status
-      }));
+      this.stompClient.send(
+        "/app/presence",
+        {},
+        JSON.stringify({
+          userId: this.state.currentUser.id,
+          status: status,
+        })
+      );
     }
   }
 
@@ -275,11 +298,15 @@ export default class ChatHomeScreen extends Component {
 
   sendTypingIndicator(isTyping) {
     if (this.stompClient && this.stompClient.connected && this.state.roomId) {
-      this.stompClient.send("/app/typing", {}, JSON.stringify({
-        roomId: this.state.roomId,
-        userId: this.state.currentUser.id,
-        isTyping: isTyping
-      }));
+      this.stompClient.send(
+        "/app/typing",
+        {},
+        JSON.stringify({
+          roomId: this.state.roomId,
+          userId: this.state.currentUser.id,
+          isTyping: isTyping,
+        })
+      );
     }
   }
 
@@ -290,12 +317,12 @@ export default class ChatHomeScreen extends Component {
     // Send typing indicator
     if (value.length > 0) {
       this.sendTypingIndicator(true);
-      
+
       // Clear previous timeout
       if (this.typingTimeout) {
         clearTimeout(this.typingTimeout);
       }
-      
+
       // Stop typing after 2 seconds of inactivity
       this.typingTimeout = setTimeout(() => {
         this.sendTypingIndicator(false);
@@ -317,7 +344,7 @@ export default class ChatHomeScreen extends Component {
       const currentUser = res.data.find(
         (user) => user.id === (queryParams.id || getUser()?.id)
       );
-      
+
       this.setState(
         {
           usersCollection: res.data,
@@ -350,7 +377,7 @@ export default class ChatHomeScreen extends Component {
           friendsList.push({
             ...user,
             roomId: friend.roomId,
-            type: 'direct'
+            type: "direct",
           });
         }
       }
@@ -371,7 +398,7 @@ export default class ChatHomeScreen extends Component {
           headers: { Authorization: `Bearer ${token}` },
         }
       );
-      const groupsWithType = res.data.map(g => ({ ...g, type: 'group' }));
+      const groupsWithType = res.data.map((g) => ({ ...g, type: "group" }));
       this.setState({ groups: groupsWithType });
     } catch (error) {
       console.error("Error loading groups:", error);
@@ -392,9 +419,9 @@ export default class ChatHomeScreen extends Component {
         }
       );
 
-      this.setState({ 
-        openAddFriend: false, 
-        friendEmail: "" 
+      this.setState({
+        openAddFriend: false,
+        friendEmail: "",
       });
       alert("Friend request sent!");
     } catch (error) {
@@ -478,7 +505,7 @@ export default class ChatHomeScreen extends Component {
 
   async startChat(chat) {
     this.setState({ isLoadingMessages: true });
-    
+
     const roomId = chat.roomId;
 
     this.setState(
@@ -513,48 +540,42 @@ export default class ChatHomeScreen extends Component {
   }
 
   async sendMessage() {
-    if (!this.state.message.trim() && this.state.selectedFiles.length === 0) return;
-    if (!this.state.roomId) return;
+  if (!this.state.message.trim() && this.state.selectedFiles.length === 0)
+    return;
+  if (!this.state.roomId) return;
 
-    this.setState({ isSendingMessage: true });
+  const messageData = {
+    id: uuidv4(),
+    type: "message",
+    text: this.state.message,
+    from: {
+      id: this.state.currentUser.id,
+      firstName: this.state.currentUser.firstName,
+      lastName: this.state.currentUser.lastName,
+    },
+    roomId: this.state.roomId,
+    timestamp: new Date().toISOString(),
+  };
 
-    const messageData = {
-      id: uuidv4(),
-      text: this.state.message,
-      from: {
-        id: this.state.currentUser.id,
-        firstName: this.state.currentUser.firstName,
-        lastName: this.state.currentUser.lastName,
-        email: this.state.currentUser.email,
-      },
-      to: this.state.targetUser.type === 'group' ? null : {
-        id: this.state.targetUser.id,
-        firstName: this.state.targetUser.firstName,
-        lastName: this.state.targetUser.lastName,
-        email: this.state.targetUser.email,
-      },
-      roomId: this.state.roomId,
-      timestamp: new Date().toISOString(),
-      replyTo: this.state.replyToMessage?.id || null,
-      files: this.state.selectedFiles.map(f => ({ name: f.name, type: f.type })),
-    };
+  // ✅ OPTIMISTIC UPDATE
+  this.setState((prevState) => ({
+    oldMessages: [...prevState.oldMessages, messageData],
+    message: "",
+    replyToMessage: null,
+    selectedFiles: [],
+  }));
 
-    if (this.stompClient && this.stompClient.connected) {
-      this.stompClient.send(
-        "/app/sendMessage",
-        {},
-        JSON.stringify(messageData)
-      );
-    }
-
-    this.setState({ 
-      message: "",
-      replyToMessage: null,
-      selectedFiles: [],
-      isSendingMessage: false
-    });
-    this.sendTypingIndicator(false);
+  if (this.stompClient && this.stompClient.connected) {
+    this.stompClient.send(
+      "/app/sendMessage",
+      {},
+      JSON.stringify(messageData)
+    );
   }
+
+  this.sendTypingIndicator(false);
+}
+
 
   async editMessage(messageId, newText) {
     const token = getToken();
@@ -566,11 +587,15 @@ export default class ChatHomeScreen extends Component {
       );
 
       if (this.stompClient && this.stompClient.connected) {
-        this.stompClient.send("/app/editMessage", {}, JSON.stringify({
-          messageId,
-          text: newText,
-          roomId: this.state.roomId
-        }));
+        this.stompClient.send(
+          "/app/editMessage",
+          {},
+          JSON.stringify({
+            messageId,
+            text: newText,
+            roomId: this.state.roomId,
+          })
+        );
       }
 
       this.setState({ editingMessageId: null, message: "" });
@@ -584,18 +609,22 @@ export default class ChatHomeScreen extends Component {
     const token = getToken();
     try {
       await axios.delete(`http://localhost:5001/message/${messageId}`, {
-        headers: { Authorization: `Bearer ${token}` }
+        headers: { Authorization: `Bearer ${token}` },
       });
 
       if (this.stompClient && this.stompClient.connected) {
-        this.stompClient.send("/app/deleteMessage", {}, JSON.stringify({
-          messageId,
-          roomId: this.state.roomId
-        }));
+        this.stompClient.send(
+          "/app/deleteMessage",
+          {},
+          JSON.stringify({
+            messageId,
+            roomId: this.state.roomId,
+          })
+        );
       }
 
-      this.setState(prevState => ({
-        oldMessages: prevState.oldMessages.filter(m => m.id !== messageId)
+      this.setState((prevState) => ({
+        oldMessages: prevState.oldMessages.filter((m) => m.id !== messageId),
       }));
     } catch (error) {
       console.error("Error deleting message:", error);
@@ -605,7 +634,7 @@ export default class ChatHomeScreen extends Component {
 
   handleSubmit = (e) => {
     e.preventDefault();
-    
+
     if (this.state.editingMessageId) {
       this.editMessage(this.state.editingMessageId, this.state.message);
     } else {
@@ -619,14 +648,14 @@ export default class ChatHomeScreen extends Component {
 
   handleFileSelect = (e) => {
     const files = Array.from(e.target.files);
-    this.setState(prevState => ({
-      selectedFiles: [...prevState.selectedFiles, ...files]
+    this.setState((prevState) => ({
+      selectedFiles: [...prevState.selectedFiles, ...files],
     }));
   };
 
   handleRemoveFile = (index) => {
-    this.setState(prevState => ({
-      selectedFiles: prevState.selectedFiles.filter((_, i) => i !== index)
+    this.setState((prevState) => ({
+      selectedFiles: prevState.selectedFiles.filter((_, i) => i !== index),
     }));
   };
 
@@ -646,10 +675,14 @@ export default class ChatHomeScreen extends Component {
 
   getStatusColor = (status) => {
     switch (status) {
-      case "online": return "#10b981";
-      case "away": return "#f59e0b";
-      case "busy": return "#ef4444";
-      default: return "#6b7280";
+      case "online":
+        return "#10b981";
+      case "away":
+        return "#f59e0b";
+      case "busy":
+        return "#ef4444";
+      default:
+        return "#6b7280";
     }
   };
 
@@ -662,29 +695,34 @@ export default class ChatHomeScreen extends Component {
       const diffInMins = Math.floor((now - date) / (1000 * 60));
       return diffInMins < 1 ? "Just now" : `${diffInMins}m ago`;
     } else if (diffInHours < 24) {
-      return date.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' });
+      return date.toLocaleTimeString("en-US", {
+        hour: "2-digit",
+        minute: "2-digit",
+      });
     } else {
-      return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+      return date.toLocaleDateString("en-US", {
+        month: "short",
+        day: "numeric",
+      });
     }
   };
 
   getFilteredChats = () => {
-    const allChats = [
-      ...this.state.friends,
-      ...this.state.groups
-    ];
+    const allChats = [...this.state.friends, ...this.state.groups];
 
-    return allChats.filter(chat => {
+    return allChats.filter((chat) => {
       const name = chat.name || `${chat.firstName} ${chat.lastName}`;
-      const matchesSearch = name.toLowerCase().includes(this.state.searchQuery.toLowerCase());
-      
+      const matchesSearch = name
+        .toLowerCase()
+        .includes(this.state.searchQuery.toLowerCase());
+
       if (!matchesSearch) return false;
 
       switch (this.state.chatFilter) {
         case "direct":
-          return chat.type === 'direct';
+          return chat.type === "direct";
         case "groups":
-          return chat.type === 'group';
+          return chat.type === "group";
         default:
           return true;
       }
@@ -695,34 +733,39 @@ export default class ChatHomeScreen extends Component {
     const typingSet = this.state.typingUsers.get(this.state.roomId);
     if (!typingSet || typingSet.size === 0) return null;
 
-    const typingUserIds = Array.from(typingSet).filter(id => id !== this.state.currentUser.id);
+    const typingUserIds = Array.from(typingSet).filter(
+      (id) => id !== this.state.currentUser.id
+    );
     if (typingUserIds.length === 0) return null;
 
-    const typingNames = typingUserIds.map(id => {
-      const user = this.state.usersCollection.find(u => u.id === id);
+    const typingNames = typingUserIds.map((id) => {
+      const user = this.state.usersCollection.find((u) => u.id === id);
       return user ? user.firstName : "Someone";
     });
 
-    const text = typingNames.length === 1 
-      ? `${typingNames[0]} is typing...`
-      : `${typingNames.join(", ")} are typing...`;
+    const text =
+      typingNames.length === 1
+        ? `${typingNames[0]} is typing...`
+        : `${typingNames.join(", ")} are typing...`;
 
     return (
-      <Typography 
-        variant="caption" 
-        sx={{ 
-          px: 3, 
-          py: 1, 
+      <Typography
+        variant="caption"
+        sx={{
+          px: 3,
+          py: 1,
           color: "#6b7280",
           fontStyle: "italic",
           display: "flex",
           alignItems: "center",
-          gap: 1
+          gap: 1,
         }}
       >
         {text}
         <span className="typing-dots">
-          <span>.</span><span>.</span><span>.</span>
+          <span>.</span>
+          <span>.</span>
+          <span>.</span>
         </span>
       </Typography>
     );
@@ -771,7 +814,14 @@ export default class ChatHomeScreen extends Component {
         >
           {/* Search and Header */}
           <Box sx={{ p: 2 }}>
-            <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center", mb: 2 }}>
+            <Box
+              sx={{
+                display: "flex",
+                justifyContent: "space-between",
+                alignItems: "center",
+                mb: 2,
+              }}
+            >
               <Typography variant="h6" sx={{ fontWeight: 600 }}>
                 Chat
               </Typography>
@@ -821,16 +871,24 @@ export default class ChatHomeScreen extends Component {
           <Tabs
             value={chatFilter}
             onChange={(e, value) => this.setState({ chatFilter: value })}
-            sx={{ 
-              borderBottom: 1, 
+            sx={{
+              borderBottom: 1,
               borderColor: "#e5e7eb",
               minHeight: 40,
-              px: 2
+              px: 2,
             }}
           >
             <Tab label="All" value="all" sx={{ minHeight: 40, fontSize: 13 }} />
-            <Tab label="Direct" value="direct" sx={{ minHeight: 40, fontSize: 13 }} />
-            <Tab label="Groups" value="groups" sx={{ minHeight: 40, fontSize: 13 }} />
+            <Tab
+              label="Direct"
+              value="direct"
+              sx={{ minHeight: 40, fontSize: 13 }}
+            />
+            <Tab
+              label="Groups"
+              value="groups"
+              sx={{ minHeight: 40, fontSize: 13 }}
+            />
           </Tabs>
 
           {/* Chat List */}
@@ -838,7 +896,9 @@ export default class ChatHomeScreen extends Component {
             {filteredChats.map((chat) => {
               const isActive = activeChat?.id === chat.id;
               const name = chat.name || `${chat.firstName} ${chat.lastName}`;
-              const isOnline = chat.type === 'direct' && this.getUserStatus(chat.id) === 'online';
+              const isOnline =
+                chat.type === "direct" &&
+                this.getUserStatus(chat.id) === "online";
 
               return (
                 <ListItemButton
@@ -848,30 +908,33 @@ export default class ChatHomeScreen extends Component {
                     px: 2,
                     py: 1.5,
                     backgroundColor: isActive ? "#f0f4ff" : "transparent",
-                    borderLeft: isActive ? "3px solid #4f46e5" : "3px solid transparent",
+                    borderLeft: isActive
+                      ? "3px solid #4f46e5"
+                      : "3px solid transparent",
                     "&:hover": { backgroundColor: "#f9fafb" },
                   }}
                 >
                   <ListItemAvatar>
                     <Badge
                       overlap="circular"
-                      anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}
+                      anchorOrigin={{ vertical: "bottom", horizontal: "right" }}
                       variant="dot"
                       sx={{
-                        '& .MuiBadge-badge': {
-                          backgroundColor: isOnline ? '#10b981' : '#d1d5db',
+                        "& .MuiBadge-badge": {
+                          backgroundColor: isOnline ? "#10b981" : "#d1d5db",
                           width: 10,
                           height: 10,
-                          borderRadius: '50%',
-                          border: '2px solid white',
-                        }
+                          borderRadius: "50%",
+                          border: "2px solid white",
+                        },
                       }}
                     >
-                      <Avatar 
-                        sx={{ 
-                          bgcolor: chat.type === 'group' ? "#fbbf24" : "#6264a7",
+                      <Avatar
+                        sx={{
+                          bgcolor:
+                            chat.type === "group" ? "#fbbf24" : "#6264a7",
                           width: 40,
-                          height: 40
+                          height: 40,
                         }}
                       >
                         {this.getInitials(name)}
@@ -880,21 +943,25 @@ export default class ChatHomeScreen extends Component {
                   </ListItemAvatar>
                   <ListItemText
                     primary={name}
-                    secondary={chat.type === 'group' ? `${chat.members?.length || 0} members` : chat.email}
-                    primaryTypographyProps={{ 
-                      fontWeight: isActive ? 600 : 400, 
+                    secondary={
+                      chat.type === "group"
+                        ? `${chat.members?.length || 0} members`
+                        : chat.email
+                    }
+                    primaryTypographyProps={{
+                      fontWeight: isActive ? 600 : 400,
                       fontSize: 14,
-                      noWrap: true
+                      noWrap: true,
                     }}
-                    secondaryTypographyProps={{ 
+                    secondaryTypographyProps={{
                       fontSize: 12,
-                      noWrap: true
+                      noWrap: true,
                     }}
                   />
                 </ListItemButton>
               );
             })}
-            
+
             {filteredChats.length === 0 && (
               <Box sx={{ p: 4, textAlign: "center" }}>
                 <Typography variant="body2" color="text.secondary">
@@ -906,443 +973,95 @@ export default class ChatHomeScreen extends Component {
         </Box>
 
         {/* Main Chat Area */}
-        <Box sx={{ flexGrow: 1, display: "flex", flexDirection: "column" }}>
-          {activeChat ? (
-            <>
-              {/* Chat Header */}
-              <Box
-                sx={{
-                  p: 2,
-                  borderBottom: "1px solid #e5e7eb",
-                  backgroundColor: "white",
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "space-between",
-                }}
-              >
-                <Box sx={{ display: "flex", alignItems: "center", gap: 2 }}>
-                  <Avatar 
-                    sx={{ 
-                      bgcolor: activeChat.type === 'group' ? "#fbbf24" : "#6264a7",
-                      width: 40,
-                      height: 40
-                    }}
-                  >
-                    {this.getInitials(
-                      activeChat.name ||
-                        `${activeChat.firstName} ${activeChat.lastName}`
-                    )}
-                  </Avatar>
-                  <Box>
-                    <Typography variant="body1" sx={{ fontWeight: 600, fontSize: 15 }}>
-                      {activeChat.name ||
-                        `${activeChat.firstName} ${activeChat.lastName}`}
-                    </Typography>
-                    <Typography variant="caption" sx={{ color: "#6b7280" }}>
-                      {activeChat.type === 'group' 
-                        ? `${activeChat.members?.length || 0} members`
-                        : this.getUserStatus(activeChat.id)}
-                    </Typography>
-                  </Box>
-                </Box>
+        <ChatWindow
+          activeChat={this.state.activeChat}
+          currentUser={this.state.currentUser}
+          oldMessages={this.state.oldMessages}
+          isLoadingMessages={this.state.isLoadingMessages}
+          isSendingMessage={this.state.isSendingMessage}
+          replyToMessage={this.state.replyToMessage}
+          selectedFiles={this.state.selectedFiles}
+          editingMessageId={this.state.editingMessageId}
+          message={this.state.message}
+          messagesEndRef={this.messagesEndRef}
+          fileInputRef={this.fileInputRef}
+          getInitials={this.getInitials}
+          getUserStatus={this.getUserStatus}
+          formatTimestamp={this.formatTimestamp}
+          renderTypingIndicator={this.renderTypingIndicator}
+          onOpenChatInfo={() => this.setState({ openChatInfo: true })}
+          onSubmit={this.handleSubmit}
+          onMessageChange={this.handleMessageChange}
+          onFileSelect={this.handleFileSelect}
+          onRemoveFile={this.handleRemoveFile}
+          onCancelReply={() => this.setState({ replyToMessage: null })}
+          onToggleEmoji={this.toggleEmoji}
+          onOpenMessageMenu={this.handleOpenMessageMenu}
 
-                <Box sx={{ display: "flex", gap: 1 }}>
-                  <Tooltip title="Video Call">
-                    <IconButton size="small">
-                      <IoVideocam />
-                    </IconButton>
-                  </Tooltip>
-                  <Tooltip title="Audio Call">
-                    <IconButton size="small">
-                      <IoCall />
-                    </IconButton>
-                  </Tooltip>
-                  <Tooltip title="Chat Info">
-                    <IconButton 
-                      size="small"
-                      onClick={() => this.setState({ openChatInfo: true })}
-                    >
-                      <IoInformationCircle />
-                    </IconButton>
-                  </Tooltip>
-                  <IconButton 
-                    size="small"
-                    onClick={(e) => this.setState({ chatOptionsAnchor: e.currentTarget })}
-                  >
-                    <IoEllipsisVertical />
-                  </IconButton>
-                </Box>
-              </Box>
-
-              {/* Messages Area */}
-              <Box 
-                sx={{ 
-                  flexGrow: 1, 
-                  overflow: "auto", 
-                  p: 3,
-                  backgroundColor: "#fafafa"
-                }}
-              >
-                {isLoadingMessages ? (
-                  <Box sx={{ display: "flex", justifyContent: "center", py: 4 }}>
-                    <CircularProgress size={30} />
-                  </Box>
-                ) : (
-                  <>
-                    {oldMessages.map((msg, index) => {
-                      const isSent = msg.from?.id === currentUser.id;
-                      const showAvatar = !isSent && (
-                        index === 0 || 
-                        oldMessages[index - 1].from?.id !== msg.from?.id
-                      );
-
-                      return (
-                        <Box
-                          key={msg.id || index}
-                          sx={{
-                            mb: 2,
-                            display: "flex",
-                            flexDirection: isSent ? "row-reverse" : "row",
-                            alignItems: "flex-start",
-                            gap: 1,
-                          }}
-                        >
-                          {!isSent && (
-                            <Avatar 
-                              sx={{ 
-                                width: 32, 
-                                height: 32,
-                                bgcolor: "#6264a7",
-                                visibility: showAvatar ? "visible" : "hidden"
-                              }}
-                            >
-                              {msg.from?.firstName?.[0]}
-                            </Avatar>
-                          )}
-
-                          <Box sx={{ maxWidth: "60%", position: "relative" }}>
-                            {!isSent && showAvatar && (
-                              <Typography 
-                                variant="caption" 
-                                sx={{ ml: 1, color: "#6b7280", display: "block", mb: 0.5 }}
-                              >
-                                {msg.from?.firstName} {msg.from?.lastName}
-                              </Typography>
-                            )}
-                            
-                            <Paper
-                              sx={{
-                                px: 2,
-                                py: 1.5,
-                                backgroundColor: isSent ? "#4f46e5" : "#ffffff",
-                                color: isSent ? "white" : "#111827",
-                                borderRadius: isSent ? "16px 16px 4px 16px" : "16px 16px 16px 4px",
-                                boxShadow: "0 1px 2px rgba(0,0,0,0.1)",
-                                position: "relative",
-                                "&:hover .message-actions": {
-                                  opacity: 1
-                                }
-                              }}
-                            >
-                              {msg.replyTo && (
-                                <Box
-                                  sx={{
-                                    borderLeft: "3px solid",
-                                    borderColor: isSent ? "rgba(255,255,255,0.3)" : "#e5e7eb",
-                                    pl: 1,
-                                    mb: 1,
-                                    opacity: 0.7
-                                  }}
-                                >
-                                  <Typography variant="caption" sx={{ fontSize: 11 }}>
-                                    Reply to message
-                                  </Typography>
-                                </Box>
-                              )}
-
-                              <Typography variant="body2" sx={{ wordWrap: "break-word" }}>
-                                {msg.text}
-                              </Typography>
-                              
-                              {msg.files && msg.files.length > 0 && (
-                                <Box sx={{ mt: 1, display: "flex", gap: 0.5, flexWrap: "wrap" }}>
-                                  {msg.files.map((file, idx) => (
-                                    <Chip
-                                      key={idx}
-                                      label={file.name}
-                                      size="small"
-                                      icon={file.type?.startsWith('image/') ? <IoImage /> : <IoDocument />}
-                                      sx={{ height: 24 }}
-                                    />
-                                  ))}
-                                </Box>
-                              )}
-
-                              <Box sx={{ display: "flex", alignItems: "center", justifyContent: "space-between", mt: 0.5 }}>
-                                <Typography
-                                  variant="caption"
-                                  sx={{
-                                    fontSize: 10,
-                                    opacity: 0.7
-                                  }}
-                                >
-                                  {this.formatTimestamp(msg.timestamp || msg.createdAt)}
-                                  {msg.edited && " (edited)"}
-                                </Typography>
-                                
-                                {isSent && (
-                                  <IoCheckmarkDone 
-                                    size={14} 
-                                    style={{ opacity: 0.7 }}
-                                  />
-                                )}
-                              </Box>
-
-                              <Box
-                                className="message-actions"
-                                sx={{
-                                  position: "absolute",
-                                  top: -10,
-                                  right: isSent ? "auto" : -40,
-                                  left: isSent ? -40 : "auto",
-                                  opacity: 0,
-                                  transition: "opacity 0.2s",
-                                }}
-                              >
-                                <IconButton
-                                  size="small"
-                                  onClick={(e) => this.setState({
-                                    messageMenuAnchor: e.currentTarget,
-                                    selectedMessageForMenu: msg
-                                  })}
-                                  sx={{ 
-                                    bgcolor: "white", 
-                                    boxShadow: 1,
-                                    width: 28,
-                                    height: 28,
-                                    "&:hover": { bgcolor: "#f3f4f6" }
-                                  }}
-                                >
-                                  <IoEllipsisVertical size={16} />
-                                </IconButton>
-                              </Box>
-                            </Paper>
-                          </Box>
-                        </Box>
-                      );
-                    })}
-                    <div ref={this.messagesEndRef} />
-                  </>
-                )}
-                
-                {this.renderTypingIndicator()}
-              </Box>
-
-              {/* Message Input Area */}
-              <Box sx={{ p: 2, backgroundColor: "white", borderTop: "1px solid #e5e7eb" }}>
-                {/* Reply Preview */}
-                {replyToMessage && (
-                  <Box
-                    sx={{
-                      mb: 1,
-                      p: 1.5,
-                      backgroundColor: "#f3f4f6",
-                      borderRadius: 1,
-                      display: "flex",
-                      justifyContent: "space-between",
-                      alignItems: "center"
-                    }}
-                  >
-                    <Box>
-                      <Typography variant="caption" sx={{ fontWeight: 600, color: "#6b7280" }}>
-                        Replying to {replyToMessage.from?.firstName}
-                      </Typography>
-                      <Typography variant="body2" sx={{ fontSize: 12 }} noWrap>
-                        {replyToMessage.text}
-                      </Typography>
-                    </Box>
-                    <IconButton
-                      size="small"
-                      onClick={() => this.setState({ replyToMessage: null })}
-                    >
-                      <IoClose />
-                    </IconButton>
-                  </Box>
-                )}
-
-                {/* File Previews */}
-                {selectedFiles.length > 0 && (
-                  <Box sx={{ mb: 1, display: "flex", gap: 1, flexWrap: "wrap" }}>
-                    {selectedFiles.map((file, index) => (
-                      <Chip
-                        key={index}
-                        label={file.name}
-                        onDelete={() => this.handleRemoveFile(index)}
-                        icon={file.type.startsWith('image/') ? <IoImage /> : <IoDocument />}
-                        size="small"
-                      />
-                    ))}
-                  </Box>
-                )}
-
-                {/* Editing Indicator */}
-                {editingMessageId && (
-                  <Box sx={{ mb: 1, display: "flex", alignItems: "center", gap: 1 }}>
-                    <IoPencil size={14} color="#6b7280" />
-                    <Typography variant="caption" sx={{ color: "#6b7280" }}>
-                      Editing message
-                    </Typography>
-                    <Button
-                      size="small"
-                      onClick={() => this.setState({ editingMessageId: null, message: "" })}
-                    >
-                      Cancel
-                    </Button>
-                  </Box>
-                )}
-
-                {/* Input Form */}
-                <Paper
-                  component="form"
-                  onSubmit={this.handleSubmit}
-                  sx={{
-                    display: "flex",
-                    alignItems: "center",
-                    px: 2,
-                    py: 1,
-                    backgroundColor: "#f9fafb",
-                    boxShadow: "none",
-                    borderRadius: 2,
-                    border: "1px solid #e5e7eb"
-                  }}
-                >
-                  <input
-                    type="file"
-                    ref={this.fileInputRef}
-                    style={{ display: 'none' }}
-                    onChange={this.handleFileSelect}
-                    multiple
-                  />
-                  
-                  <Tooltip title="Attach File">
-                    <IconButton
-                      size="small"
-                      onClick={() => this.fileInputRef.current?.click()}
-                    >
-                      <IoAttach />
-                    </IconButton>
-                  </Tooltip>
-
-                  <InputBase
-                    placeholder={editingMessageId ? "Edit message..." : "Type a message..."}
-                    fullWidth
-                    name="message"
-                    value={this.state.message}
-                    onChange={this.handleMessageChange}
-                    sx={{ mx: 1, fontSize: 14 }}
-                    multiline
-                    maxRows={4}
-                  />
-
-                  <Tooltip title="Emoji">
-                    <IconButton
-                      size="small"
-                      onClick={() => this.setState(prev => ({ showEmojiPicker: !prev.showEmojiPicker }))}
-                    >
-                      <IoHappy />
-                    </IconButton>
-                  </Tooltip>
-
-                  <Tooltip title={editingMessageId ? "Save" : "Send"}>
-                    <IconButton
-                      type="submit"
-                      size="small"
-                      disabled={isSendingMessage || (!this.state.message.trim() && selectedFiles.length === 0)}
-                      sx={{ 
-                        color: "#4f46e5",
-                        ml: 1,
-                        "&:disabled": { color: "#d1d5db" }
-                      }}
-                    >
-                      {isSendingMessage ? <CircularProgress size={20} /> : <IoSend />}
-                    </IconButton>
-                  </Tooltip>
-                </Paper>
-              </Box>
-            </>
-          ) : (
-            <Box
-              sx={{
-                flexGrow: 1,
-                display: "flex",
-                flexDirection: "column",
-                alignItems: "center",
-                justifyContent: "center",
-                color: "#6b7280"
-              }}
-            >
-              <IoChatbubbleEllipsesOutline size={64} style={{ opacity: 0.3, marginBottom: 16 }} />
-              <Typography variant="h6" sx={{ fontWeight: 500, mb: 1 }}>
-                Select a conversation
-              </Typography>
-              <Typography variant="body2">
-                Choose a friend or group to start chatting
-              </Typography>
-            </Box>
-          )}
-        </Box>
+        />
 
         {/* Message Context Menu */}
         <Menu
           anchorEl={this.state.messageMenuAnchor}
           open={Boolean(this.state.messageMenuAnchor)}
-          onClose={() => this.setState({ messageMenuAnchor: null, selectedMessageForMenu: null })}
+          onClose={() =>
+            this.setState({
+              messageMenuAnchor: null,
+              selectedMessageForMenu: null,
+            })
+          }
         >
           <MenuItem
             onClick={() => {
-              this.setState({ 
+              this.setState({
                 replyToMessage: this.state.selectedMessageForMenu,
                 messageMenuAnchor: null,
-                selectedMessageForMenu: null
+                selectedMessageForMenu: null,
               });
             }}
           >
             <IoAdd style={{ marginRight: 8 }} /> Reply
           </MenuItem>
-          
+
           {this.state.selectedMessageForMenu?.from?.id === currentUser.id && (
             <MenuItem
               onClick={() => {
                 const msg = this.state.selectedMessageForMenu;
-                this.setState({ 
+                this.setState({
                   editingMessageId: msg.id,
                   message: msg.text,
                   messageMenuAnchor: null,
-                  selectedMessageForMenu: null
+                  selectedMessageForMenu: null,
                 });
               }}
             >
               <IoPencil style={{ marginRight: 8 }} /> Edit
             </MenuItem>
           )}
-          
+
           {this.state.selectedMessageForMenu?.from?.id === currentUser.id && (
             <MenuItem
               onClick={() => {
                 if (window.confirm("Delete this message?")) {
                   this.deleteMessage(this.state.selectedMessageForMenu.id);
-                  this.setState({ messageMenuAnchor: null, selectedMessageForMenu: null });
+                  this.setState({
+                    messageMenuAnchor: null,
+                    selectedMessageForMenu: null,
+                  });
                 }
               }}
             >
               <IoTrash style={{ marginRight: 8 }} /> Delete
             </MenuItem>
           )}
-          
+
           <MenuItem
             onClick={() => {
               // Implement pin functionality
-              this.setState({ messageMenuAnchor: null, selectedMessageForMenu: null });
+              this.setState({
+                messageMenuAnchor: null,
+                selectedMessageForMenu: null,
+              });
             }}
           >
             <IoPushOutline style={{ marginRight: 8 }} /> Pin
@@ -1355,14 +1074,21 @@ export default class ChatHomeScreen extends Component {
           open={Boolean(this.state.chatOptionsAnchor)}
           onClose={() => this.setState({ chatOptionsAnchor: null })}
         >
-          <MenuItem onClick={() => this.setState({ openChatInfo: true, chatOptionsAnchor: null })}>
+          <MenuItem
+            onClick={() =>
+              this.setState({ openChatInfo: true, chatOptionsAnchor: null })
+            }
+          >
             <IoInformationCircle style={{ marginRight: 8 }} /> Chat Info
           </MenuItem>
           <MenuItem onClick={() => this.setState({ chatOptionsAnchor: null })}>
             <IoArchive style={{ marginRight: 8 }} /> Archive Chat
           </MenuItem>
           <Divider />
-          <MenuItem onClick={() => this.setState({ chatOptionsAnchor: null })} sx={{ color: "#ef4444" }}>
+          <MenuItem
+            onClick={() => this.setState({ chatOptionsAnchor: null })}
+            sx={{ color: "#ef4444" }}
+          >
             <IoTrash style={{ marginRight: 8 }} /> Delete Chat
           </MenuItem>
         </Menu>
@@ -1370,7 +1096,9 @@ export default class ChatHomeScreen extends Component {
         {/* Add Friend Dialog */}
         <Dialog
           open={this.state.openAddFriend}
-          onClose={() => this.setState({ openAddFriend: false, friendEmail: "" })}
+          onClose={() =>
+            this.setState({ openAddFriend: false, friendEmail: "" })
+          }
           maxWidth="xs"
           fullWidth
         >
@@ -1390,10 +1118,18 @@ export default class ChatHomeScreen extends Component {
             />
           </DialogContent>
           <DialogActions>
-            <Button onClick={() => this.setState({ openAddFriend: false, friendEmail: "" })}>
+            <Button
+              onClick={() =>
+                this.setState({ openAddFriend: false, friendEmail: "" })
+              }
+            >
               Cancel
             </Button>
-            <Button onClick={this.addFriend} variant="contained" disabled={!this.state.friendEmail.trim()}>
+            <Button
+              onClick={this.addFriend}
+              variant="contained"
+              disabled={!this.state.friendEmail.trim()}
+            >
               Send Request
             </Button>
           </DialogActions>
@@ -1402,7 +1138,14 @@ export default class ChatHomeScreen extends Component {
         {/* Create Group Dialog */}
         <Dialog
           open={this.state.openCreateGroup}
-          onClose={() => this.setState({ openCreateGroup: false, groupName: "", groupDescription: "", selectedMembers: [] })}
+          onClose={() =>
+            this.setState({
+              openCreateGroup: false,
+              groupName: "",
+              groupDescription: "",
+              selectedMembers: [],
+            })
+          }
           maxWidth="sm"
           fullWidth
         >
@@ -1431,12 +1174,28 @@ export default class ChatHomeScreen extends Component {
               onChange={this.handleChange}
               placeholder="What's this group about?"
             />
-            <Typography variant="subtitle2" sx={{ mt: 2, mb: 1, fontWeight: 600 }}>
+            <Typography
+              variant="subtitle2"
+              sx={{ mt: 2, mb: 1, fontWeight: 600 }}
+            >
               Select Members:
             </Typography>
-            <Box sx={{ maxHeight: 200, overflow: "auto", border: "1px solid #e5e7eb", borderRadius: 1, p: 1 }}>
+            <Box
+              sx={{
+                maxHeight: 200,
+                overflow: "auto",
+                border: "1px solid #e5e7eb",
+                borderRadius: 1,
+                p: 1,
+              }}
+            >
               {this.state.friends.length === 0 ? (
-                <Typography variant="body2" color="text.secondary" align="center" sx={{ py: 2 }}>
+                <Typography
+                  variant="body2"
+                  color="text.secondary"
+                  align="center"
+                  sx={{ py: 2 }}
+                >
                   No friends available. Add friends first!
                 </Typography>
               ) : (
@@ -1456,9 +1215,10 @@ export default class ChatHomeScreen extends Component {
                             });
                           } else {
                             this.setState({
-                              selectedMembers: this.state.selectedMembers.filter(
-                                (id) => id !== friend.id
-                              ),
+                              selectedMembers:
+                                this.state.selectedMembers.filter(
+                                  (id) => id !== friend.id
+                                ),
                             });
                           }
                         }}
@@ -1471,17 +1231,30 @@ export default class ChatHomeScreen extends Component {
               )}
             </Box>
             {this.state.selectedMembers.length > 0 && (
-              <Typography variant="caption" color="text.secondary" sx={{ mt: 1, display: "block" }}>
+              <Typography
+                variant="caption"
+                color="text.secondary"
+                sx={{ mt: 1, display: "block" }}
+              >
                 {this.state.selectedMembers.length} member(s) selected
               </Typography>
             )}
           </DialogContent>
           <DialogActions>
-            <Button onClick={() => this.setState({ openCreateGroup: false, groupName: "", groupDescription: "", selectedMembers: [] })}>
+            <Button
+              onClick={() =>
+                this.setState({
+                  openCreateGroup: false,
+                  groupName: "",
+                  groupDescription: "",
+                  selectedMembers: [],
+                })
+              }
+            >
               Cancel
             </Button>
-            <Button 
-              onClick={this.createGroup} 
+            <Button
+              onClick={this.createGroup}
               variant="contained"
               disabled={!this.state.groupName.trim()}
             >
@@ -1500,10 +1273,10 @@ export default class ChatHomeScreen extends Component {
           <DialogTitle sx={{ fontWeight: 600 }}>
             Friend Requests
             {pendingRequests.length > 0 && (
-              <Chip 
-                label={pendingRequests.length} 
-                size="small" 
-                sx={{ ml: 1 }} 
+              <Chip
+                label={pendingRequests.length}
+                size="small"
+                sx={{ ml: 1 }}
                 color="primary"
               />
             )}
@@ -1512,7 +1285,10 @@ export default class ChatHomeScreen extends Component {
           <DialogContent dividers sx={{ maxHeight: 400, overflowY: "auto" }}>
             {pendingRequests.length === 0 ? (
               <Box sx={{ py: 4, textAlign: "center" }}>
-                <IoNotifications size={48} style={{ opacity: 0.3, marginBottom: 16 }} />
+                <IoNotifications
+                  size={48}
+                  style={{ opacity: 0.3, marginBottom: 16 }}
+                />
                 <Typography color="text.secondary">
                   No pending requests
                 </Typography>
@@ -1531,11 +1307,13 @@ export default class ChatHomeScreen extends Component {
                       sx={{
                         py: 2,
                         borderBottom: "1px solid #f3f4f6",
-                        "&:last-child": { borderBottom: "none" }
+                        "&:last-child": { borderBottom: "none" },
                       }}
                     >
                       <ListItemAvatar>
-                        <Avatar sx={{ bgcolor: "#6264a7", width: 48, height: 48 }}>
+                        <Avatar
+                          sx={{ bgcolor: "#6264a7", width: 48, height: 48 }}
+                        >
                           {this.getInitials(
                             `${user.firstName} ${user.lastName}`
                           )}
@@ -1592,16 +1370,23 @@ export default class ChatHomeScreen extends Component {
           fullWidth
         >
           <DialogTitle>
-            {activeChat?.type === 'group' ? 'Group Info' : 'Contact Info'}
+            {activeChat?.type === "group" ? "Group Info" : "Contact Info"}
           </DialogTitle>
           <DialogContent dividers>
-            <Box sx={{ display: "flex", flexDirection: "column", alignItems: "center", mb: 3 }}>
+            <Box
+              sx={{
+                display: "flex",
+                flexDirection: "column",
+                alignItems: "center",
+                mb: 3,
+              }}
+            >
               <Avatar
                 sx={{
                   width: 80,
                   height: 80,
-                  bgcolor: activeChat?.type === 'group' ? "#fbbf24" : "#6264a7",
-                  mb: 2
+                  bgcolor: activeChat?.type === "group" ? "#fbbf24" : "#6264a7",
+                  mb: 2,
                 }}
               >
                 {this.getInitials(
@@ -1613,14 +1398,14 @@ export default class ChatHomeScreen extends Component {
                 {activeChat?.name ||
                   `${activeChat?.firstName} ${activeChat?.lastName}`}
               </Typography>
-              {activeChat?.type === 'direct' && (
+              {activeChat?.type === "direct" && (
                 <Typography variant="body2" color="text.secondary">
                   {activeChat?.email}
                 </Typography>
               )}
             </Box>
 
-            {activeChat?.type === 'group' && (
+            {activeChat?.type === "group" && (
               <>
                 <Divider sx={{ my: 2 }} />
                 <Typography variant="subtitle2" sx={{ fontWeight: 600, mb: 1 }}>
@@ -1628,12 +1413,16 @@ export default class ChatHomeScreen extends Component {
                 </Typography>
                 <List dense>
                   {(activeChat.members || []).slice(0, 5).map((memberId) => {
-                    const member = this.state.usersCollection.find(u => u.id === memberId);
+                    const member = this.state.usersCollection.find(
+                      (u) => u.id === memberId
+                    );
                     if (!member) return null;
                     return (
                       <ListItem key={memberId}>
                         <ListItemAvatar>
-                          <Avatar sx={{ width: 32, height: 32, bgcolor: "#6264a7" }}>
+                          <Avatar
+                            sx={{ width: 32, height: 32, bgcolor: "#6264a7" }}
+                          >
                             {member.firstName[0]}
                           </Avatar>
                         </ListItemAvatar>

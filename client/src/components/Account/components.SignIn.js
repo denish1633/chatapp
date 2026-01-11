@@ -8,6 +8,7 @@ import {
   Grid,
   Box,
   Typography,
+  Alert,
 } from "@mui/material";
 import LockOutlinedIcon from "@mui/icons-material/LockOutlined";
 import bgImage from "./bgImage.png";
@@ -18,57 +19,54 @@ export default class SignIn extends React.Component {
     this.state = {
       email: "",
       password: "",
-      userId: "",
-      usersCollection: [],
+      error: "",
+      loading: false,
     };
 
     this.handleSubmit = this.handleSubmit.bind(this);
     this.handleChange = this.handleChange.bind(this);
-    this.validation = this.validation.bind(this);
   }
 
   componentDidMount() {
-    document.body.style.backgroundColor = "#111c5a"; // Set background color globally
-
-    axios
-      .get("http://localhost:5000/user")
-      .then((res) => this.setState({ usersCollection: res.data }))
-      .catch((error) => console.log(error));
-  }
-
-  validation() {
-    const isDuplicate = this.state.usersCollection.some(
-      (user) =>
-        user.email === this.state.email && user.password === this.state.password
-    );
-
-    if (isDuplicate) {
-      const user = this.state.usersCollection.find(
-        (user) =>
-          user.email === this.state.email &&
-          user.password === this.state.password
-      );
-      this.setState({ userId: user._id });
-      console.log("User valid");
+    document.body.style.backgroundColor = "#111c5a";
+    
+    // Check if user is already logged in
+    const token = localStorage.getItem("token");
+    if (token) {
+      const user = JSON.parse(localStorage.getItem("user") || "{}");
+      if (user._id) {
+        console.log("Current User:", user);
+        window.location = `/Chat?id=${user._id}`;
+      }
     }
-
-    return isDuplicate;
   }
 
-  handleSubmit(e) {
+  async handleSubmit(e) {
     e.preventDefault();
-    if (this.validation()) {
-      axios
-        .post("http://localhost:5000/user/signin", {
-          email: this.state.email,
-          password: this.state.password,
-        })
-        .then((res) => {
-          console.log(res.data);
-          window.location = `/Home?id=${this.state.userId}`;
-        });
-    } else {
-      console.log("Invalid credentials");
+    this.setState({ loading: true, error: "" });
+
+    try {
+      const response = await axios.post("http://localhost:5001/auth/login", {
+        email: this.state.email,
+        password: this.state.password,
+      });
+
+      const { token, user } = response.data;
+
+      // Store token and user info in localStorage
+      localStorage.setItem("token", token);
+      localStorage.setItem("user", JSON.stringify(user));
+
+      console.log("Login successful:", user);
+
+      // Redirect to home page
+      window.location = `/Chat?id=${user.id}`;
+    } catch (error) {
+      console.error("Login error:", error);
+      this.setState({
+        error: error.response?.data?.message || "Invalid email or password",
+        loading: false,
+      });
     }
   }
 
@@ -96,7 +94,7 @@ export default class SignIn extends React.Component {
             p: { xs: 3, md: 5 },
             maxWidth: "900px",
             width: "100%",
-            justifyItems: "space-between"
+            justifyItems: "space-between",
           }}
         >
           {/* Left Side: Form Section */}
@@ -111,19 +109,24 @@ export default class SignIn extends React.Component {
               component="h1"
               variant="h2"
               fontWeight="bold"
-              sx={{ whiteSpace: "pre-line", color:"#ffff" }}
+              sx={{ whiteSpace: "pre-line", color: "#ffff" }}
             >
               {`Have your \n best chat`}
             </Typography>
             <Typography
               component="h1"
-              
-              sx={{ whiteSpace: "pre-line", color:"#ffff",fontSize:"25px" }}
+              sx={{ whiteSpace: "pre-line", color: "#ffff", fontSize: "25px" }}
             >
               {`Fast, easy, unlimited chat services`}
             </Typography>
 
-            <Box component="form" noValidate sx={{ mt: 2 }}>
+            <Box component="form" onSubmit={this.handleSubmit} noValidate sx={{ mt: 2 }}>
+              {this.state.error && (
+                <Alert severity="error" sx={{ mb: 2 }}>
+                  {this.state.error}
+                </Alert>
+              )}
+
               <TextField
                 margin="normal"
                 required
@@ -134,11 +137,14 @@ export default class SignIn extends React.Component {
                 autoComplete="email"
                 autoFocus
                 onChange={this.handleChange}
-                sx={{ backgroundColor: "#ffff", 
+                value={this.state.email}
+                sx={{
+                  backgroundColor: "#ffff",
                   fontSize: 16,
                   maxWidth: "350px",
                   width: "100%",
-                  mx: "auto", }}
+                  mx: "auto",
+                }}
               />
 
               <TextField
@@ -151,9 +157,10 @@ export default class SignIn extends React.Component {
                 id="password"
                 autoComplete="current-password"
                 onChange={this.handleChange}
+                value={this.state.password}
                 sx={{
-                  backgroundColor: "#ffff", 
-                  fontSize: 16, 
+                  backgroundColor: "#ffff",
+                  fontSize: 16,
                   maxWidth: "350px",
                   width: "100%",
                   mx: "auto",
@@ -163,6 +170,7 @@ export default class SignIn extends React.Component {
               <Button
                 type="submit"
                 variant="contained"
+                disabled={this.state.loading}
                 sx={{
                   mt: 3,
                   mb: 2,
@@ -173,9 +181,8 @@ export default class SignIn extends React.Component {
                   width: "100%",
                   mx: "auto",
                 }}
-                onClick={this.handleSubmit}
               >
-                Sign In
+                {this.state.loading ? "Signing In..." : "Sign In"}
               </Button>
 
               <Grid container spacing={5}>

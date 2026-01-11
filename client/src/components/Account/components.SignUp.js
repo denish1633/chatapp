@@ -1,6 +1,5 @@
 import * as React from "react";
 import axios from "axios";
-
 import {
   Avatar,
   Button,
@@ -12,7 +11,9 @@ import {
   Box,
   Typography,
   Container,
+  Alert,
 } from "@mui/material";
+
 export default class SignUp extends React.Component {
   constructor(props) {
     super(props);
@@ -22,94 +23,104 @@ export default class SignUp extends React.Component {
       email: "",
       password: "",
       confirmPassword: "",
-      usersCollection: [],
-      profilePhoto: "",
+      profilePhoto: null,
+      profilePhotoPreview: "",
+      error: "",
+      loading: false,
     };
     this.handleSubmit = this.handleSubmit.bind(this);
     this.handleChange = this.handleChange.bind(this);
-    this.validation = this.validation.bind(this);
+    this.handleFileChange = this.handleFileChange.bind(this);
   }
+
   componentDidMount() {
-    axios
-      .get("http://localhost:5000/user")
-      .then((res) => {
-        this.setState({ usersCollection: res.data });
-        console.log(res.data);
-      })
-      .catch(function (error) {
-        console.log(error);
-      });
+    document.body.style.backgroundColor = "#fff";
   }
 
-  validation() {
-    // /^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/.test(myForm.emailAddr.value)
-    var isPassword = false;
-    if (this.state.confirmPassword === this.state.password) {
-      console.log("user password validated");
-      isPassword = true;
-    } else {
-      console.log("user password not validated");
-      isPassword = false;
-    }
-
-    const isDuplicate = this.state.usersCollection.map((user) => {
-      if (user.email === this.state.email) {
-        console.log("user already exists");
-        return false;
-      } else {
-        return true;
-      }
-    });
-
-    if (isPassword && isDuplicate) {
-      console.log("user validated");
-      return true;
-    } else if (!isPassword) {
-      console.log("password not validated");
-      return false;
-    }
-  }
-
-  handleSubmit(e) {
+  async handleSubmit(e) {
     e.preventDefault();
-    const formData = new FormData();
-    formData.append("firstName", this.state.firstName);
-    formData.append("lastName", this.state.lastName);
-    formData.append("email", this.state.email);
-    formData.append("password", this.state.password);
-    formData.append("profilePhoto", this.state.profilePhoto);
+    this.setState({ loading: true, error: "" });
 
-    console.log("Sending signup request with data:", formData);
+    // Validation
+    if (this.state.password !== this.state.confirmPassword) {
+      this.setState({
+        error: "Passwords do not match",
+        loading: false,
+      });
+      return;
+    }
 
-    axios
-      .post("http://localhost:5000/user/signup", formData, {
-        headers: { "Content-Type": "multipart/form-data" },
-      })
-      .then((res) => {
-        console.log("Signup success:", res.data);
-        window.location = `/Home?id=${res.data._id}`;
-      })
-      .catch((err) => {
-        console.error("Upload failed:", err);
+    if (this.state.password.length < 6) {
+      this.setState({
+        error: "Password must be at least 6 characters",
+        loading: false,
+      });
+      return;
+    }
+
+    try {
+      // Upload profile photo first if exists
+      let profilePicUrl = "";
+      if (this.state.profilePhoto) {
+        const formData = new FormData();
+        formData.append("file", this.state.profilePhoto);
+        
+        // You can use a service like Cloudinary or store in your backend
+        // For now, we'll just use a placeholder
+        profilePicUrl = this.state.profilePhotoPreview;
+      }
+
+      // Register user
+      const response = await axios.post("http://localhost:5001/auth/register", {
+        firstName: this.state.firstName,
+        lastName: this.state.lastName,
+        email: this.state.email,
+        password: this.state.password,
+        profilePic: profilePicUrl,
       });
 
+      const { token, user } = response.data;
 
+      // Store token and user info
+      localStorage.setItem("token", token);
+      localStorage.setItem("user", JSON.stringify(user));
+
+      console.log("Registration successful:", user);
+
+      // Redirect to home page
+      window.location = `/Chat?id=${user.id}`;
+      console.log("User registered successfully:", user);
+    } catch (error) {
+      console.error("Registration error:", error);
+      this.setState({
+        error: error.response?.data?.message || "Registration failed. Please try again.",
+        loading: false,
+      });
+    }
   }
-
-
 
   handleChange(e) {
     this.setState({
       [e.target.name]: e.target.value,
     });
-    console.log(this.state.profilePhoto);
   }
+
+  handleFileChange(e) {
+    const file = e.target.files[0];
+    if (file) {
+      this.setState({
+        profilePhoto: file,
+        profilePhotoPreview: URL.createObjectURL(file),
+      });
+    }
+  }
+
   render() {
     return (
       <Container component="main" maxWidth="xs">
         <Box
-          component={"form"}
-          encType="multipart/form-data"
+          component="form"
+          onSubmit={this.handleSubmit}
           sx={{
             marginTop: 8,
             display: "flex",
@@ -120,24 +131,26 @@ export default class SignUp extends React.Component {
           <Button variant="ghost" component="label">
             <Avatar
               sx={{ width: 80, height: 80, bgcolor: "secondary.main" }}
-              src={this.state.profilePhoto ? URL.createObjectURL(this.state.profilePhoto) : ""}
+              src={this.state.profilePhotoPreview || ""}
             />
             <input
               type="file"
               hidden
-              accept="image/*" // ✅ Restrict file types
-              onChange={(e) => {
-                if (e.target.files[0]) {
-                  this.setState({ profilePhoto: e.target.files[0] }); // ✅ Save file
-                }
-              }}
+              accept="image/*"
+              onChange={this.handleFileChange}
             />
           </Button>
-
 
           <Typography component="h1" variant="h5">
             Sign up
           </Typography>
+
+          {this.state.error && (
+            <Alert severity="error" sx={{ mt: 2, width: "100%" }}>
+              {this.state.error}
+            </Alert>
+          )}
+
           <Box noValidate sx={{ mt: 3 }}>
             <Grid container spacing={2}>
               <Grid item xs={12} sm={6}>
@@ -150,6 +163,7 @@ export default class SignUp extends React.Component {
                   label="First Name"
                   autoFocus
                   onChange={this.handleChange}
+                  value={this.state.firstName}
                 />
               </Grid>
               <Grid item xs={12} sm={6}>
@@ -161,6 +175,7 @@ export default class SignUp extends React.Component {
                   name="lastName"
                   autoComplete="family-name"
                   onChange={this.handleChange}
+                  value={this.state.lastName}
                 />
               </Grid>
               <Grid item xs={12}>
@@ -171,7 +186,9 @@ export default class SignUp extends React.Component {
                   label="Email Address"
                   name="email"
                   onChange={this.handleChange}
+                  value={this.state.email}
                   autoComplete="email"
+                  type="email"
                 />
               </Grid>
               <Grid item xs={12}>
@@ -184,6 +201,7 @@ export default class SignUp extends React.Component {
                   id="password"
                   autoComplete="new-password"
                   onChange={this.handleChange}
+                  value={this.state.password}
                 />
               </Grid>
               <Grid item xs={12}>
@@ -196,6 +214,7 @@ export default class SignUp extends React.Component {
                   id="confirmPassword"
                   autoComplete="new-password"
                   onChange={this.handleChange}
+                  value={this.state.confirmPassword}
                 />
               </Grid>
               <Grid item xs={12}>
@@ -211,10 +230,10 @@ export default class SignUp extends React.Component {
               type="submit"
               fullWidth
               variant="contained"
+              disabled={this.state.loading}
               sx={{ mt: 3, mb: 2 }}
-              onClick={this.handleSubmit}
             >
-              Sign Up
+              {this.state.loading ? "Signing Up..." : "Sign Up"}
             </Button>
             <Grid container justifyContent="flex-end">
               <Grid item>
