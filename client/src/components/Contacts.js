@@ -58,7 +58,7 @@ export default class Contacts extends Component {
   async getUserData() {
     const queryParams = queryString.parse(window.location.search);
 
-    await axios
+    await api
       .get("/user")
       .then((res) => {
         this.setState({
@@ -78,7 +78,7 @@ export default class Contacts extends Component {
     })[0];
   }
   async updateUser(userObject) {
-    await axios
+    await api
       .post(`/user/update/${userObject._id}`, userObject)
       .then((res) => console.log(res.data));
   }
@@ -152,7 +152,7 @@ export default class Contacts extends Component {
     });
     this.updateUser(targetUser);
     var data={_id:roomId,chatHistory:[]};
-    axios
+    api
       .post("/message/new", data)
       .then((res) => console.log(res.data));
     console.log("message added");
@@ -210,7 +210,7 @@ export default class Contacts extends Component {
     }
   }
   async getOldChat(roomId) {
-    return await axios
+    return await api
       .get(`/message/${roomId}`)
       .then((res) => {
         this.setState({
@@ -222,7 +222,7 @@ export default class Contacts extends Component {
       });
   }
   async addMessage(data) {
-    await axios
+    await api
       .post(`/message/update/${this.state.roomId}`, data)
       .then((res) => console.log(res.data));
     console.log("message added");

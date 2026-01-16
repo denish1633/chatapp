@@ -1,5 +1,5 @@
 import React, { Component } from "react";
-import axios from "./axiosConfig";
+import api from "./axiosConfig";
 import queryString from "query-string";
 import SockJS from "sockjs-client";
 import { Stomp } from "@stomp/stompjs";
@@ -310,7 +310,7 @@ export default class ChatHomeScreen extends Component {
     const token = getToken();
 
     try {
-      const res = await axios.get("/user", {
+      const res = await api.get("/user", {
         headers: { Authorization: `Bearer ${token}` },
       });
 
@@ -365,7 +365,7 @@ export default class ChatHomeScreen extends Component {
 
     const token = getToken();
     try {
-      const res = await axios.get(
+      const res = await api.get(
         `/group/user/${this.state.currentUser.id}`,
         {
           headers: { Authorization: `Bearer ${token}` },
@@ -381,7 +381,7 @@ export default class ChatHomeScreen extends Component {
   async addFriend() {
     const token = getToken();
     try {
-      await axios.post(
+      await api.post(
         "/user/friend-request",
         {
           currentUserId: this.state.currentUser.id,
@@ -406,7 +406,7 @@ export default class ChatHomeScreen extends Component {
   async acceptRequest(friendId) {
     const token = getToken();
     try {
-      await axios.post(
+      await api.post(
         `/user/accept-friend/${this.state.currentUser.id}/${friendId}`,
         {},
         {
@@ -426,7 +426,7 @@ export default class ChatHomeScreen extends Component {
   async declineRequest(friendId) {
     const token = getToken();
     try {
-      await axios.post(
+      await api.post(
         `/user/decline-friend/${this.state.currentUser.id}/${friendId}`,
         {},
         {
@@ -450,7 +450,7 @@ export default class ChatHomeScreen extends Component {
 
     const token = getToken();
     try {
-      await axios.post(
+      await api.post(
         `/group?userId=${this.state.currentUser.id}`,
         {
           name: this.state.groupName,
@@ -503,7 +503,7 @@ export default class ChatHomeScreen extends Component {
   async getOldChat(roomId) {
     const token = getToken();
     try {
-      const res = await axios.get(`/message/${roomId}`, {
+      const res = await api.get(`/message/${roomId}`, {
         headers: { Authorization: `Bearer ${token}` },
       });
       this.setState({ oldMessages: res.data });
@@ -559,7 +559,7 @@ export default class ChatHomeScreen extends Component {
   async editMessage(messageId, newText) {
     const token = getToken();
     try {
-      await axios.put(
+      await api.put(
         `/message/${messageId}`,
         { text: newText },
         { headers: { Authorization: `Bearer ${token}` } }
@@ -583,7 +583,7 @@ export default class ChatHomeScreen extends Component {
   async deleteMessage(messageId) {
     const token = getToken();
     try {
-      await axios.delete(`/message/${messageId}`, {
+      await api.delete(`/message/${messageId}`, {
         headers: { Authorization: `Bearer ${token}` }
       });
 

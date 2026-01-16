@@ -1,5 +1,5 @@
 import * as React from "react";
-import api from "./axiosConfig";
+import api from "../axiosConfig";
 import {
   Avatar,
   Button,
@@ -46,7 +46,7 @@ export default class SignIn extends React.Component {
     this.setState({ loading: true, error: "" });
 
     try {
-      const response = await axios.post("/auth/login", {
+      const response = await api.post("/auth/login", {
         email: this.state.email,
         password: this.state.password,
       });
