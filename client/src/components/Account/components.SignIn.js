@@ -1,5 +1,5 @@
 import * as React from "react";
-import api from "../axiosConfig";
+import api from "./axiosConfig";
 import {
   Avatar,
   Button,

@@ -1,10 +1,9 @@
 import React, { Component } from "react";
-import api from "../axiosConfig";
+import api from "./axiosConfig";
 import queryString from "query-string";
 import "whatwg-fetch";
 import { MdSearch} from "react-icons/md";
-import socket from "../socket";
-
+import socket from "./socket";
 import PersonAddIcon from "@mui/icons-material/Person";
 import PersonRemoveIcon from "@mui/icons-material/Person";
 import {BsChatLeftTextFill} from "react-icons/bs";

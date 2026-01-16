@@ -2,11 +2,11 @@ import React from 'react';
 import { Link } from 'react-router-dom';
 import { TextField, Modal, Box, Button, Typography, List, ListItem, ListItemText, ListItemAvatar, Avatar, ListItemSecondaryAction, IconButton, Container, Grid } from '@mui/material';
 import { Edit as EditIcon, Delete as DeleteIcon, ArrowBack as ArrowBackIcon } from '@mui/icons-material';
-import socket from "../socket";
+import socket from "./socket";
 
 import InputAdornment from '@mui/material/InputAdornment';
 import AccountCircle from '@mui/icons-material/AccountCircle';
-import api from "../axiosConfig";
+import api from "./axiosConfig";
 import queryString from "query-string";
 import { v4 as uuidv4 } from "uuid";
 
