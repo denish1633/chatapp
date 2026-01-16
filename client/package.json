@@ -27,7 +27,7 @@
     "uuid": "^8.3.2",
     "web-vitals": "^2.1.4"
   },
-  "homepage": "https://github.com/denish1633/chatapp",
+  "homepage": "https://denish1633.github.io/chatapp",
   "scripts": {
     "start": "react-scripts start",
     "build": "react-scripts build",
