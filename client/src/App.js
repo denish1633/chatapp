@@ -3,7 +3,7 @@ import { createTheme, ThemeProvider } from '@mui/material/styles';
 import CssBaseline from '@mui/material/CssBaseline';
 
 
-import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { BrowserRouter, Routes, Route, HashRouter } from "react-router-dom";
 import SignUp from "./components/Account/components.SignUp.js";
 import NoPage from "./components/Account/compomemts.NoPage.js";
 import SignIn from "./components/Account/components.SignIn.js";
@@ -27,7 +27,7 @@ function App() {
     <div>
           <ThemeProvider theme={theme}>
 
-      <BrowserRouter>
+      <HashRouter>
         <Routes>
           <Route>
             <Route path="Signup" element={<SignUp />} />
@@ -41,7 +41,7 @@ function App() {
 
           </Route>
         </Routes>
-      </BrowserRouter>
+      </HashRouter>
       </ThemeProvider>
 
     </div>
