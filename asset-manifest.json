@@ -1,11 +1,11 @@
 {
   "files": {
-    "main.js": "/denish1633/chatapp/static/js/main.d84f3391.js",
-    "static/media/bgImage.png": "/denish1633/chatapp/static/media/bgImage.5ed15877665b071fd05d.png",
-    "index.html": "/denish1633/chatapp/index.html",
-    "main.d84f3391.js.map": "/denish1633/chatapp/static/js/main.d84f3391.js.map"
+    "main.js": "/chatapp/static/js/main.f05d5f06.js",
+    "static/media/bgImage.png": "/chatapp/static/media/bgImage.5ed15877665b071fd05d.png",
+    "index.html": "/chatapp/index.html",
+    "main.f05d5f06.js.map": "/chatapp/static/js/main.f05d5f06.js.map"
   },
   "entrypoints": [
-    "static/js/main.d84f3391.js"
+    "static/js/main.f05d5f06.js"
   ]
 }
