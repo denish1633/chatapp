@@ -2,10 +2,11 @@ import React from 'react';
 import { Link } from 'react-router-dom';
 import { TextField, Modal, Box, Button, Typography, List, ListItem, ListItemText, ListItemAvatar, Avatar, ListItemSecondaryAction, IconButton, Container, Grid } from '@mui/material';
 import { Edit as EditIcon, Delete as DeleteIcon, ArrowBack as ArrowBackIcon } from '@mui/icons-material';
-import { io } from "socket.io-client";
+import socket from "../socket";
+
 import InputAdornment from '@mui/material/InputAdornment';
 import AccountCircle from '@mui/icons-material/AccountCircle';
-import axios from "axios";
+import api from "../axiosConfig";
 import queryString from "query-string";
 import { v4 as uuidv4 } from "uuid";
 
@@ -42,7 +43,7 @@ class Account extends React.Component {
         const queryParams = queryString.parse(window.location.search);
 
         await axios
-            .get("http://localhost:5001/user")
+            .get("/user")
             .then((res) => {
                 this.setState({
                     usersCollection: res.data,
@@ -62,7 +63,7 @@ class Account extends React.Component {
     }
     async updateUser(userObject) {
         await axios
-            .post(`http://localhost:5001/user/update/${userObject._id}`, userObject)
+            .post(`/user/update/${userObject._id}`, userObject)
             .then((res) => console.log(res.data));
     }
     addFriend() {
@@ -136,7 +137,7 @@ class Account extends React.Component {
         this.updateUser(targetUser);
         var data = { _id: roomId, chatHistory: [] };
         axios
-            .post("http://localhost:5001/message/new", data)
+            .post("/message/new", data)
             .then((res) => console.log(res.data));
         console.log("message added");
     }
@@ -165,7 +166,7 @@ class Account extends React.Component {
 
     componentDidMount() {
         this.getUserData();
-        this.socket = io.connect("ws://localhost:8900");
+        this.socket = socket;
 
         this.socket.on("getMessage", (data) => {
             this.getOldChat(data.roomId);

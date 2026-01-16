@@ -1,5 +1,5 @@
 import * as React from "react";
-import axios from "axios";
+import api from "../axiosConfig";
 import {
   Avatar,
   Button,
@@ -71,7 +71,7 @@ export default class SignUp extends React.Component {
       }
 
       // Register user
-      const response = await axios.post("http://localhost:5001/auth/register", {
+      const response = await axios.post("/auth/register", {
         firstName: this.state.firstName,
         lastName: this.state.lastName,
         email: this.state.email,

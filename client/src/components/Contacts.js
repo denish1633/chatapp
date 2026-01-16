@@ -1,9 +1,10 @@
 import React, { Component } from "react";
-import axios from "axios";
+import api from "../axiosConfig";
 import queryString from "query-string";
 import "whatwg-fetch";
 import { MdSearch} from "react-icons/md";
-import { io } from "socket.io-client";
+import socket from "../socket";
+
 import PersonAddIcon from "@mui/icons-material/Person";
 import PersonRemoveIcon from "@mui/icons-material/Person";
 import {BsChatLeftTextFill} from "react-icons/bs";
@@ -59,7 +60,7 @@ export default class Contacts extends Component {
     const queryParams = queryString.parse(window.location.search);
 
     await axios
-      .get("http://localhost:5001/user")
+      .get("/user")
       .then((res) => {
         this.setState({
           usersCollection: res.data,
@@ -79,7 +80,7 @@ export default class Contacts extends Component {
   }
   async updateUser(userObject) {
     await axios
-      .post(`http://localhost:5001/user/update/${userObject._id}`, userObject)
+      .post(`/user/update/${userObject._id}`, userObject)
       .then((res) => console.log(res.data));
   }
   addFriend() {
@@ -153,7 +154,7 @@ export default class Contacts extends Component {
     this.updateUser(targetUser);
     var data={_id:roomId,chatHistory:[]};
     axios
-      .post("http://localhost:5001/message/new", data)
+      .post("/message/new", data)
       .then((res) => console.log(res.data));
     console.log("message added");
   }
@@ -193,7 +194,7 @@ export default class Contacts extends Component {
   }
   componentDidMount() {
     this.getUserData();
-    this.socket = io.connect("ws://localhost:8900");
+    this.socket = socket;
 
     this.socket.on("getMessage", (data) => {
       this.getOldChat(data.roomId);
@@ -211,7 +212,7 @@ export default class Contacts extends Component {
   }
   async getOldChat(roomId) {
     return await axios
-      .get(`http://localhost:5001/message/${roomId}`)
+      .get(`/message/${roomId}`)
       .then((res) => {
         this.setState({
           messageHistory: res.data[0].messageHistory,
@@ -223,7 +224,7 @@ export default class Contacts extends Component {
   }
   async addMessage(data) {
     await axios
-      .post(`http://localhost:5001/message/update/${this.state.roomId}`, data)
+      .post(`/message/update/${this.state.roomId}`, data)
       .then((res) => console.log(res.data));
     console.log("message added");
   }

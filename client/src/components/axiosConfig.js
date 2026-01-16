@@ -1,31 +1,26 @@
 import axios from "axios";
 
-// Add request interceptor to include JWT token
-axios.interceptors.request.use(
-  (config) => {
-    const token = localStorage.getItem("token");
-    if (token) {
-      config.headers.Authorization = `Bearer ${token}`;
-    }
-    return config;
-  },
-  (error) => {
-    return Promise.reject(error);
-  }
-);
+const api = axios.create({
+  baseURL: process.env.REACT_APP_API_URL,
+});
 
-// Add response interceptor to handle 401 errors
-axios.interceptors.response.use(
-  (response) => response,
+api.interceptors.request.use((config) => {
+  const token = localStorage.getItem("token");
+  if (token) {
+    config.headers.Authorization = `Bearer ${token}`;
+  }
+  return config;
+});
+
+api.interceptors.response.use(
+  (res) => res,
   (error) => {
     if (error.response?.status === 401) {
-      // Token expired or invalid
-      localStorage.removeItem("token");
-      localStorage.removeItem("user");
-      window.location = "/SignIn";
+      localStorage.clear();
+      window.location.href = "/SignIn";
     }
     return Promise.reject(error);
   }
 );
 
-export default axios;
+export default api;

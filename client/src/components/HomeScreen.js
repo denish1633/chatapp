@@ -163,7 +163,7 @@ export default class ChatHomeScreen extends Component {
   };
 
   connectWebSocket() {
-    const socket = new SockJS("http://localhost:5001/ws");
+    const socket = new SockJS(process.env.REACT_APP_WS_URL);
     this.stompClient = Stomp.over(socket);
 
     this.stompClient.connect(
@@ -337,7 +337,7 @@ handleOpenMessageMenu = (event, message) => {
     const token = getToken();
 
     try {
-      const res = await axios.get("http://localhost:5001/user", {
+      const res = await axios.get("/user", {
         headers: { Authorization: `Bearer ${token}` },
       });
 
@@ -393,7 +393,7 @@ handleOpenMessageMenu = (event, message) => {
     const token = getToken();
     try {
       const res = await axios.get(
-        `http://localhost:5001/group/user/${this.state.currentUser.id}`,
+        `/group/user/${this.state.currentUser.id}`,
         {
           headers: { Authorization: `Bearer ${token}` },
         }
@@ -409,7 +409,7 @@ handleOpenMessageMenu = (event, message) => {
     const token = getToken();
     try {
       await axios.post(
-        "http://localhost:5001/user/friend-request",
+        "/user/friend-request",
         {
           currentUserId: this.state.currentUser.id,
           targetEmail: this.state.friendEmail,
@@ -434,7 +434,7 @@ handleOpenMessageMenu = (event, message) => {
     const token = getToken();
     try {
       await axios.post(
-        `http://localhost:5001/user/accept-friend/${this.state.currentUser.id}/${friendId}`,
+        `/user/accept-friend/${this.state.currentUser.id}/${friendId}`,
         {},
         {
           headers: { Authorization: `Bearer ${token}` },
@@ -454,7 +454,7 @@ handleOpenMessageMenu = (event, message) => {
     const token = getToken();
     try {
       await axios.post(
-        `http://localhost:5001/user/decline-friend/${this.state.currentUser.id}/${friendId}`,
+        `/user/decline-friend/${this.state.currentUser.id}/${friendId}`,
         {},
         {
           headers: { Authorization: `Bearer ${token}` },
@@ -478,7 +478,7 @@ handleOpenMessageMenu = (event, message) => {
     const token = getToken();
     try {
       await axios.post(
-        `http://localhost:5001/group?userId=${this.state.currentUser.id}`,
+        `/group?userId=${this.state.currentUser.id}`,
         {
           name: this.state.groupName,
           description: this.state.groupDescription,
@@ -530,7 +530,7 @@ handleOpenMessageMenu = (event, message) => {
   async getOldChat(roomId) {
     const token = getToken();
     try {
-      const res = await axios.get(`http://localhost:5001/message/${roomId}`, {
+      const res = await axios.get(`/message/${roomId}`, {
         headers: { Authorization: `Bearer ${token}` },
       });
       this.setState({ oldMessages: res.data });
@@ -581,7 +581,7 @@ handleOpenMessageMenu = (event, message) => {
     const token = getToken();
     try {
       await axios.put(
-        `http://localhost:5001/message/${messageId}`,
+        `/message/${messageId}`,
         { text: newText },
         { headers: { Authorization: `Bearer ${token}` } }
       );
@@ -608,7 +608,7 @@ handleOpenMessageMenu = (event, message) => {
   async deleteMessage(messageId) {
     const token = getToken();
     try {
-      await axios.delete(`http://localhost:5001/message/${messageId}`, {
+      await axios.delete(`/message/${messageId}`, {
         headers: { Authorization: `Bearer ${token}` },
       });
 

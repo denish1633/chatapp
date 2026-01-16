@@ -149,7 +149,7 @@ export default class GroupChatScreen extends Component {
   };
 
   connectWebSocket() {
-    const socket = new SockJS("http://localhost:5001/ws");
+    const socket = new SockJS(process.env.REACT_APP_WS_URL);
     this.stompClient = Stomp.over(socket);
 
     this.stompClient.connect(
@@ -261,7 +261,7 @@ export default class GroupChatScreen extends Component {
   async getUserData() {
     const token = getToken();
     try {
-      const res = await axios.get("http://localhost:5001/user", {
+      const res = await axios.get("/user", {
         headers: { Authorization: `Bearer ${token}` },
       });
 
@@ -290,7 +290,7 @@ export default class GroupChatScreen extends Component {
 
     const token = getToken();
     try {
-      const res = await axios.get(`http://localhost:5001/group/${groupId}`, {
+      const res = await axios.get(`/group/${groupId}`, {
         headers: { Authorization: `Bearer ${token}` },
       });
 
@@ -327,7 +327,7 @@ export default class GroupChatScreen extends Component {
     
     try {
       const res = await axios.get(
-        `http://localhost:5001/message/${this.state.currentGroup.roomId}`,
+        `/message/${this.state.currentGroup.roomId}`,
         { headers: { Authorization: `Bearer ${token}` } }
       );
       this.setState({ groupMessages: res.data });
@@ -381,7 +381,7 @@ export default class GroupChatScreen extends Component {
     const token = getToken();
     try {
       await axios.post(
-        `http://localhost:5001/group/${this.state.currentGroup.id}/members`,
+        `/group/${this.state.currentGroup.id}/members`,
         { memberIds: this.state.selectedNewMembers },
         { headers: { Authorization: `Bearer ${token}` } }
       );
@@ -407,7 +407,7 @@ export default class GroupChatScreen extends Component {
     const token = getToken();
     try {
       await axios.delete(
-        `http://localhost:5001/group/${this.state.currentGroup.id}/members/${memberId}`,
+        `/group/${this.state.currentGroup.id}/members/${memberId}`,
         { headers: { Authorization: `Bearer ${token}` } }
       );
 
@@ -430,7 +430,7 @@ export default class GroupChatScreen extends Component {
     const token = getToken();
     try {
       await axios.post(
-        `http://localhost:5001/group/${this.state.currentGroup.id}/admins`,
+        `/group/${this.state.currentGroup.id}/admins`,
         { userId: memberId },
         { headers: { Authorization: `Bearer ${token}` } }
       );
@@ -447,7 +447,7 @@ export default class GroupChatScreen extends Component {
     const token = getToken();
     try {
       await axios.post(
-        `http://localhost:5001/group/${this.state.currentGroup.id}/leave`,
+        `/group/${this.state.currentGroup.id}/leave`,
         { userId: this.state.currentUser.id },
         { headers: { Authorization: `Bearer ${token}` } }
       );
@@ -464,7 +464,7 @@ export default class GroupChatScreen extends Component {
     const token = getToken();
     try {
       await axios.put(
-        `http://localhost:5001/message/${messageId}`,
+        `/message/${messageId}`,
         { text: newText },
         { headers: { Authorization: `Bearer ${token}` } }
       );
@@ -487,7 +487,7 @@ export default class GroupChatScreen extends Component {
   async deleteMessage(messageId) {
     const token = getToken();
     try {
-      await axios.delete(`http://localhost:5001/message/${messageId}`, {
+      await axios.delete(`/message/${messageId}`, {
         headers: { Authorization: `Bearer ${token}` }
       });
 
