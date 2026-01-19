@@ -28,7 +28,6 @@ function App() {
           <ThemeProvider theme={theme}>
 
       <HashRouter>
-        <Routes>
           <Route>
             <Route path="Signup" element={<SignUp />} />
             <Route path="/" element={<SignIn />} />
@@ -40,7 +39,6 @@ function App() {
             <Route path="Files" element={<Account />} />
 
           </Route>
-        </Routes>
       </HashRouter>
       </ThemeProvider>
 
